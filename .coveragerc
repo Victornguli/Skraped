@@ -3,3 +3,6 @@ omit =
     *__init__.py,
 	*tests.py,
     home/travis/*
+    /home/travis/
+    */home/travis/*
+    /home/travis/*
