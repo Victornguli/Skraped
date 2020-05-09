@@ -7,6 +7,6 @@ install:
   - pip install coveralls
   - pip install coverage
 script:
-  - coverage run -m pytest
+  - pytest --cov
 after_success:
   - coveralls
