@@ -5,8 +5,8 @@ install:
   - pip install -r requirements.txt
   - pip install pytest-cov
   - pip install coveralls
-  - rm .coverage
+  - pip install coverage
 script:
-  - pytest --cov=skraper
+  - coverage run --omit */home/* pytest
 after_success:
   - coveralls
