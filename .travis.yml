@@ -7,6 +7,5 @@ install:
   - pip install coveralls
   - pip install coverage
 script:
-  - coverage run --omit */home/* -m pytest
 after_success:
   - coveralls
