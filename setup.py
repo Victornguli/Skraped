@@ -6,7 +6,9 @@ description = 'CLI tool for scraping and aggregating Kenyan tech job posted on v
 url = 'https://github.com/Victornguli/Skraped'
 requires = [
 	'pytest>=5.4.2',
-	'coveralls-2.0.0',
+	'pytest-cov>=2.8.1',
+	'coveralls>=2.0.0',
+	'validators>=0.15.0',
 ]
 
 with open("README.md", 'r') as f:

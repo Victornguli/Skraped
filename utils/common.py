@@ -2,6 +2,7 @@
 Common validator utility functions
 """
 import logging
+import validators
 from urllib.parse import urlparse
 
 
@@ -12,11 +13,10 @@ def validate_and_parse_url(url):
 	:type url: str
 	:return: str | None
 	"""
-	try:
+	url = str(url)
+	if validators.url(url):
 		parsed_url = urlparse(url)
 		return {
 			'scheme': parsed_url.scheme, 'base': parsed_url.netloc, 'path': parsed_url.path, 'params':
 				parsed_url.params, 'query': parsed_url.query}
-	except Exception as ex:
-		logging.exception('validate_and_parse_url Exception: %s' % ex)
 	return None
