@@ -6,6 +6,6 @@ install:
   - pip install pytest-cov
   - pip install coveralls
 script:
-  - coverage run --omit /home/*
+  - coverage run --omit /home/*.py
 after_success:
   - coveralls
