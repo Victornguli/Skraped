@@ -6,6 +6,6 @@ install:
   - pip install pytest-cov
   - pip install coveralls
 script:
-  -pytest --cov=skraper/
+  - pytest --cov=skraper
 after_success:
   - coveralls
