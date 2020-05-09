@@ -1,5 +1,5 @@
 import pytest
-from utils.validators import validate_and_parse_url
+from skraper.utils.validators import validate_and_parse_url
 
 
 def test_validate_and_parse_url():
