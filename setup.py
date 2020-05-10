@@ -9,6 +9,7 @@ requires = [
 	'pytest-cov>=2.8.1',
 	'coveralls>=2.0.0',
 	'validators>=0.15.0',
+	'pyyaml>=5.3.1'
 ]
 
 with open("README.md", 'r') as f:
