@@ -18,7 +18,7 @@ Skraper requires [Python 3.6.0](https://www.python.org) or a later version. Othe
 #### Installation
 ```
 pip install git+https://github.com/Victornguli/Skraped.git
-funnel --help
+skraper --help
 ```
 
 or you can first clone the repository then install setup using pip
