@@ -26,7 +26,7 @@ or you can first clone the repository then install setup using pip
 ```
 git clone https://github.com/Victornguli/Skraped.git skraped
 cd skraped
-pip install setup.py
+python install setup.py
 ```
 
 #### Using Skraper
