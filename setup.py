@@ -29,5 +29,5 @@ setup(
 	install_requires = requires,
 	packages = find_packages(exclude = 'tests'),
 	include_package_data = True,
-	entry_points = {'console_scripts': ['skraper=skraper.__main__:main']}
+	entry_points = {'console_scripts': ['skraper=skraped.__main__:main']}
 )

@@ -1,6 +1,6 @@
 import argparse
 import pytest
-from config.validate_config import validate_conf, ConfigError, validate_output_path, validate_sources
+from skraped.config.validate_config import validate_conf, ConfigError, validate_output_path, validate_sources
 
 
 def test_validate_config():
