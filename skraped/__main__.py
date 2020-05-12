@@ -15,12 +15,8 @@ else:
 
 
 def main():
-    lgr.critical('Initialized job Logs')
     config = parse_config()
-    print(config)
-    # validate_conf(config)
-    # print(config.kw)
-    return 'OK'
+    pass
 
 
 if __name__ == "__main__":
