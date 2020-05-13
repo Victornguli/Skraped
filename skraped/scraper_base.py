@@ -8,7 +8,7 @@ lgr = logging.getLogger(__name__)
 class ScraperBase():
     """Base class implementing core scraping functionality"""
 
-    def __init__(self, config):
+    def __init__(self, config={}):
         self.config = config
 
     def run_scraper(self):
@@ -25,15 +25,19 @@ class ScraperBase():
     def call_class_method(class_instance, function_name, **kwargs):
         """Calls calls a function from the passed in class instance"""
         try:
-            return getattr(class_instance, fuction_name)(**kwargs)
-        except Exception:
-            lgr.exception('call_class_method Exception: %s' % ex)
-            pass
+            return getattr(class_instance, function_name)(**kwargs)
+        except AttributeError:
+            lgr.warning(
+                f'method {function_name} does not exist in {class_instance}')
         return None
 
     @staticmethod
     def get_class_instance(class_name, **kwargs):
         """Retrieves a class instance to be used for running individual scrapers"""
         if class_name in globals() and hasattr(globals()[class_name], '__class__'):
-            return globals()[class_name](**kwargs)
+            try:
+                return globals()[class_name](**kwargs)
+            except TypeError:
+                lgr.warning(
+                    f'{class_name} cannot be retrieved.')
         return None
