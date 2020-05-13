@@ -4,6 +4,8 @@ from bs4 import BeautifulSoup
 
 lgr = logging.getLogger(__name__)
 
+# TODO: Add a base requests method/config to be used by each scraper class
+
 
 class ScraperBase():
     """Base class implementing core scraping functionality"""
@@ -11,15 +13,23 @@ class ScraperBase():
     def __init__(self, config={}):
         self.config = config
 
-    def run_scraper(self):
+    def scrape(self):
         """Entry Point to the execution of all scrape scources defined in the config"""
         scraper_classes = self.config.sources
         for scraper_class in scraper_classes:
             class_instance = self.get_class_instance(
                 scraper_class, config=self.config)
-            self.call_class_method(class_instance, 'run_scraper')
-            # TODO: Need to Architect fully the full flow of the data from each scraper and how it will be
-            # Aggregated into the csv file output
+            self.call_class_method(
+                class_instance, 'scrape', config=self.config)
+
+    def get_next_page(self, *args, **kwargs):
+        raise NotImplementedError
+
+    def extract_jobs_from_page(self, *args, **kwargs):
+        raise NotImplementedError
+
+    def extract_jobs_from_details(self, *args, **kwargs):
+        raise NotImplementedError
 
     @staticmethod
     def call_class_method(class_instance, function_name, **kwargs):
@@ -28,7 +38,8 @@ class ScraperBase():
             if class_instance is not None and function_name:
                 return getattr(class_instance, function_name)(**kwargs)
         except AttributeError:
-            lgr.warning(f'method {function_name} does not exist in {class_instance}')
+            lgr.warning(
+                f'method {function_name} does not exist in {class_instance}')
         return None
 
     @staticmethod
