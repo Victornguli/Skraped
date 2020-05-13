@@ -25,10 +25,10 @@ class ScraperBase():
     def call_class_method(class_instance, function_name, **kwargs):
         """Calls calls a function from the passed in class instance"""
         try:
-            return getattr(class_instance, function_name)(**kwargs)
+            if class_instance is not None and function_name:
+                return getattr(class_instance, function_name)(**kwargs)
         except AttributeError:
-            lgr.warning(
-                f'method {function_name} does not exist in {class_instance}')
+            lgr.warning(f'method {function_name} does not exist in {class_instance}')
         return None
 
     @staticmethod
@@ -38,6 +38,5 @@ class ScraperBase():
             try:
                 return globals()[class_name](**kwargs)
             except TypeError:
-                lgr.warning(
-                    f'{class_name} cannot be retrieved.')
+                lgr.warning(f'{class_name} cannot be retrieved.')
         return None
