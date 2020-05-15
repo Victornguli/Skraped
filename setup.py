@@ -11,7 +11,8 @@ requires = [
     'validators>=0.15.0',
     'pyyaml>=5.3.1',
     'beautifulsoup4>=4.9.0',
-    'lxml>=4.5.0'
+    'lxml>=4.5.0',
+    'fake-useragent>=0.1.11'
 ]
 
 with open("README.md", 'r') as f:
