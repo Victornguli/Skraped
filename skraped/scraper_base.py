@@ -34,27 +34,6 @@ class ScraperBase():
         raise NotImplementedError
 
     @staticmethod
-    def call_class_method(class_instance, function_name, **kwargs):
-        """Calls calls a function from the passed in class instance"""
-        try:
-            if class_instance is not None and function_name:
-                return getattr(class_instance, function_name)(**kwargs)
-        except AttributeError:
-            lgr.warning(
-                f'method {function_name} does not exist in {class_instance}')
-        return None
-
-    @staticmethod
-    def get_class_instance(class_name, **kwargs):
-        """Retrieves a class instance to be used for running individual scrapers"""
-        if class_name in globals() and hasattr(globals()[class_name], '__class__'):
-            try:
-                return globals()[class_name](**kwargs)
-            except TypeError:
-                lgr.warning(f'{class_name} cannot be retrieved.')
-        return None
-
-    @staticmethod
     def send_request(url, method):
         """Sends an http request to the url using requests library"""
         try:
