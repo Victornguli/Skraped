@@ -52,7 +52,7 @@ class ScraperBase():
             # Pass empty proxies for now. Allow calling of diffrent HTTP methods separately.
             req = requests.get  # Defaults the HTTP method to get
             try:
-                req = getattr(requests, method)
+                req = getattr(requests, method.lower())
             except AttributeError:
                 lgr.warning(
                     f'{method} is an invalid HTTP method. Defaulting to GET')
