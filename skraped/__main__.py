@@ -21,7 +21,7 @@ def main():
     validate_conf(config)
     base = ScraperBase(config)
     scraper_classes = config.get('sources')
-    # return scraper_classes
+    # return config
     for scraper in scraper_classes:
         class_instance = get_class_instance(scraper, config=config)
         if class_instance is None:

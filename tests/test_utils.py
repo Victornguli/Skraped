@@ -1,5 +1,5 @@
 import pytest
-from skraped.utils import validate_and_parse_url, get_project_root
+from skraped.utils import validate_and_parse_url
 
 
 def test_validate_and_parse_url():
@@ -12,6 +12,6 @@ def test_validate_and_parse_url():
     assert malformed_url is None, 'Malformed url should return None'
 
 
-def test_get_project_root():
-    root = get_project_root()
-    assert root is not None, 'Should retrieve the root path successfully'
+# def test_get_project_root():
+#     root = get_project_root()
+#     assert root is not None, 'Should retrieve the root path successfully'

@@ -38,6 +38,8 @@ def validate_output_path(path):
     """Validates the output path defined"""
     if not path or not isinstance(path, str):
         raise ConfigError('path')
+    if not os.path.exists(path):
+        raise ConfigError('path')
 
 
 def validate_conf(conf):
@@ -47,3 +49,7 @@ def validate_conf(conf):
             raise ConfigError(conf_item)
     validate_sources(conf.get('sources', []))
     validate_output_path(conf.get('output_path', ''))
+
+
+if __name__ == '__main__':
+    validate_output_path('./data')

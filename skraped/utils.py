@@ -26,11 +26,12 @@ def validate_and_parse_url(url):
     return None
 
 
-def get_project_root():
-    """
-    Retrieves the full path of the root path for the project
-    """
-    parent_path = os.path.dirname(os.path.dirname(__file__))
-    if os.path.exists(parent_path):
-        return parent_path
-    return None
+# def get_project_root():
+#     """
+#     Retrieves the full path of the root path for the project
+#     """
+#     parent_path = os.path.dirname(os.path.dirname(__file__))
+#     if os.path.exists(parent_path):
+#         print(parent_path)
+#         return parent_path
+#     return None
