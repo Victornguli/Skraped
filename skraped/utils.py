@@ -1,6 +1,7 @@
 """
-Common validator utility functions
+Common utility functions
 """
+import os
 import logging
 import validators
 from urllib.parse import urlparse
@@ -23,3 +24,17 @@ def validate_and_parse_url(url):
             'scheme': parsed_url.scheme, 'base': parsed_url.netloc, 'path': parsed_url.path, 'params':
             parsed_url.params, 'query': parsed_url.query}
     return None
+
+
+def get_project_root():
+    """
+    Retrieves the full path of the root path for the project
+    """
+    parent_path = os.path.dirname(os.path.dirname(__file__))
+    if os.path.exists(parent_path):
+        return parent_path
+    return None
+
+
+if __name__ == '__main__':
+    get_project_root()
