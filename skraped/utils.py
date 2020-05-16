@@ -34,7 +34,3 @@ def get_project_root():
     if os.path.exists(parent_path):
         return parent_path
     return None
-
-
-if __name__ == '__main__':
-    get_project_root()
