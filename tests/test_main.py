@@ -1,5 +1,5 @@
 import pytest
-from skraped.__main__ import get_class_instance, call_class_method
+from skraped.__main__ import get_class_instance, get_class_method
 
 
 def test_get_class_instance():
@@ -15,12 +15,11 @@ def test_get_class_instance_fail():
 
 def test_call_class_method_pass():
     class_instance = get_class_instance(class_name='ScraperBase')
-    assert call_class_method(
-        class_instance, 'send_request', url='https://www.google.com', method='GET') is not None
+    cls_method = get_class_method(class_instance, 'send_request')
+    assert cls_method(url='https://www.google.com', method='GET') is not None
 
 
 def test_call_class_method_fail():
-    class_instance = get_class_instance(
-        class_name='ScraperBase')
-    assert call_class_method(
-        class_instance, 'missing_fn') is None
+    class_instance = get_class_instance(class_name='ScraperBase')
+    cls_method = get_class_method(class_instance, 'missing_fn')
+    assert cls_method is None

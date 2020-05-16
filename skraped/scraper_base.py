@@ -1,10 +1,10 @@
-import logging
 import requests
+import logging
 
 from bs4 import BeautifulSoup
 from fake_useragent import UserAgent
 
-lgr = logging.getLogger(__name__)
+lgr = logging.getLogger()
 
 # TODO: Add a base requests method/config to be used by each scraper class
 
@@ -17,12 +17,7 @@ class ScraperBase():
 
     def scrape(self):
         """Entry Point to the execution of all scrape scources defined in the config"""
-        scraper_classes = self.config.sources
-        for scraper_class in scraper_classes:
-            class_instance = self.get_class_instance(
-                scraper_class, config=self.config)
-            self.call_class_method(
-                class_instance, 'scrape', config=self.config)
+        pass
 
     def get_next_page(self, *args, **kwargs):
         raise NotImplementedError
@@ -49,7 +44,6 @@ class ScraperBase():
             proxies = {
                 'https': ''
             }
-            # Pass empty proxies for now. Allow calling of diffrent HTTP methods separately.
             req = requests.get  # Defaults the HTTP method to get
             try:
                 req = getattr(requests, method.lower())
@@ -61,6 +55,7 @@ class ScraperBase():
                 lgr.error(
                     f'Request to {url} return status code {resp.status_code}')
             else:
+                lgr.info('Request sent successfully')
                 return resp.text
         except requests.ConnectionError as e:
             lgr.error(

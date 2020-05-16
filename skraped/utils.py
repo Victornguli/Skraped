@@ -4,12 +4,9 @@ Common validator utility functions
 import logging
 import validators
 from urllib.parse import urlparse
-from skraped.config.log_conf import configure_logging
 # from skraped.scraper_base import ScraperBase
 
-configure_logging()
-
-lgr = logging.getLogger('main')
+lgr = logging.getLogger()
 
 
 def validate_and_parse_url(url):

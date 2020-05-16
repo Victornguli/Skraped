@@ -2,16 +2,36 @@ import sys
 import logging
 from skraped.config.parser import parse_config
 from skraped.config.validate_config import validate_conf
-from skraped.config.log_conf import configure_logging
 from skraped.scraper_base import ScraperBase
+from skraped.glassdoor import Glassdoor
 
-configure_logging()
-lgr = logging.getLogger('main')
+
+lgr = logging.getLogger()
+lgr.setLevel('INFO')
+logging.basicConfig(filename='basic.log', level='INFO')
+
+if lgr.level == 20:
+    lgr.addHandler(logging.StreamHandler(sys.stdout))
+else:
+    lgr.addHandler(logging.StreamHandler())
 
 
 def main():
     config = parse_config()
-    pass
+    validate_conf(config)
+    base = ScraperBase(config)
+    lgr.info('Init Scraping')
+    scraper_classes = config.get('sources')
+    # return scraper_classes
+    for scraper in scraper_classes:
+        class_instance = get_class_instance(scraper, config=config)
+        if class_instance is None:
+            lgr.exception(
+                f'Failed to retrieve the Scraper Class {scraper}. Exiting...')
+            sys.exit()
+        scrape = get_class_method(class_instance, 'scrape')
+        res = scrape()
+        print(res)
 
 
 def get_class_instance(class_name, **kwargs):
@@ -24,13 +44,13 @@ def get_class_instance(class_name, **kwargs):
     return None
 
 
-def call_class_method(class_instance, function_name, **kwargs):
+def get_class_method(class_instance, function_name, **kwargs):
     """
-        Calls calls a function from the passed in class instance
+    Retrives a class function from the passed in class instance
     """
     try:
         if class_instance is not None and function_name:
-            return getattr(class_instance, function_name)(**kwargs)
+            return getattr(class_instance, function_name)
     except AttributeError:
         lgr.warning(
             f'method {function_name} does not exist in {class_instance}')

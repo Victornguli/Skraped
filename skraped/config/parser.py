@@ -4,7 +4,8 @@ import argparse
 import yaml
 from yaml import load, dump
 
-lgr = logging.getLogger(__name__)
+lgr = logging.getLogger()
+
 
 SETTINGS_PATH = './settings.yaml'
 

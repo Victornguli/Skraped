@@ -5,9 +5,9 @@ output_path: "./data"
 # Sources to be scraped: Comment out either to ignore it when running skraper.
 # Defaults to Linkedin, Glassdoor and BrighterMonday.
 sources:
-  - "Linkedin"
-  - "GLassdoor"
-  - "BrighterMonday"
+  # - "Linkedin"
+  - "Glassdoor"
+  # - "BrighterMonday"
 
 # Search keywords to be submitted during the search
-keywords: "Python developer"
+keywords: "job"

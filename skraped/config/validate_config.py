@@ -1,7 +1,8 @@
 import os
 import logging
 
-lgr = logging.getLogger(__name__)
+lgr = logging.getLogger()
+
 
 VALID_CONFIG = {
     'output_path': './',
@@ -37,7 +38,7 @@ def validate_output_path(path):
     """Validates the output path defined"""
     if not path or not isinstance(path, str):
         raise ConfigError('path')
-    
+
 
 def validate_conf(conf):
     """Validates a config before running the scraper"""
