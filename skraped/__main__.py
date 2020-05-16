@@ -20,7 +20,6 @@ def main():
     config = parse_config()
     validate_conf(config)
     base = ScraperBase(config)
-    lgr.info('Init Scraping')
     scraper_classes = config.get('sources')
     # return scraper_classes
     for scraper in scraper_classes:

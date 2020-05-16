@@ -55,7 +55,6 @@ class ScraperBase():
                 lgr.error(
                     f'Request to {url} return status code {resp.status_code}')
             else:
-                lgr.info('Request sent successfully')
                 return resp.text
         except requests.ConnectionError as e:
             lgr.error(

@@ -1,4 +1,5 @@
 import logging
+import json
 from bs4 import BeautifulSoup
 from skraped.scraper_base import ScraperBase
 
@@ -32,9 +33,26 @@ class Glassdoor(ScraperBase):
         for key, value in self.query_params.items():
             self.url += '&' + str(key)+'='+str(value)
 
-        pages = self.get_pages(page_limit=5)
-        lgr.info('Retrived {} pages from Glassdoor'.format(len(pages)))
-        return len(pages)
+        pages = self.get_pages(page_limit=1)
+        job_details = []
+
+        if pages:
+            job_links = self.get_job_links(pages)
+            if not job_links:
+                lgr.error(
+                    'Failed to retrieve the job links for Glassdoor search')
+                return job_details
+            for link in job_links:
+                lgr.info(f'Fetching details for {link}')
+                info = self.extract_job_details(link)
+                if not info:
+                    lgr.error(f'Failed to retrieve details for {link}')
+                    continue
+                job_details.append(info)
+            with open('details.json', 'a+') as f:
+                json.dump(job_details, f)
+                # lgr.info('Retrived {} pages from Glassdoor'.format(len(pages)))
+        return len(job_details)
 
     def get_pages(self, page_limit=2):
         """
@@ -50,6 +68,7 @@ class Glassdoor(ScraperBase):
                 page_soup = BeautifulSoup(res, 'lxml')
                 pages.append(page_soup)
                 page_count += 1
+                lgr.info(f'Fetched page {page_count} of Glassdoor results')
                 footer = page_soup.find(
                     'div', {'id': 'FooterPageNav', 'class': 'pageNavBar'})
                 if footer:
@@ -62,16 +81,24 @@ class Glassdoor(ScraperBase):
                     break
         return pages
 
-    def get_job_links(self, soup):
+    def get_job_links(self, pages_soup):
         """
         Retrieves job links from scraped pages
-        @param soup: The parsed HTML for the pages to be processed
-        @type soup: BeautifulSoup
+        @param pages_soup: The parsed HTML for each of the pages to be processed
+        @type pages_soup: BeautifulSoup
         @return: List of the extracted job links
         @rtype: List
         """
-        job_links = list()
-        pass
+        job_links = set()
+        for page in pages_soup:
+            links = page.find_all(
+                'a', {'class': ['jobInfoItem', 'jobTitle', 'jobLink']})
+            if links:
+                links = map(lambda x: x['href'], links)
+                for link in links:
+                    if link not in job_links:
+                        job_links.add(self.base_url + link)
+        return list(job_links)
 
     def extract_job_details(self, job_url):
         """
@@ -80,4 +107,33 @@ class Glassdoor(ScraperBase):
         @type job_url: str
         @return: The extracted job details
         """
-        pass
+        res = self.send_request(job_url, 'get')
+        if not res:
+            lgr.error(f'{job_url} details request returned None')
+            return None
+        soup = BeautifulSoup(res)
+        if not soup:
+            lgr.error(
+                f'Failed to parse the response HTML for this post {job_url}')
+            return None
+        job_details = {
+            'title': '',
+            'company': '',
+            'job_link': job_url,
+            'application_link': '',
+            'description': '',
+            'job_id': ''
+        }
+        title = soup.find('div', {'class': 'e11nt52q5'})
+        company = soup.find('div', {'class': 'e11nt52q1'})
+        application_link = soup.find('a', {'class': 'applyButton'})
+        description = soup.find('div', {'class': 'desc'})
+
+        job_details['title'] = title.text if title else ''
+        job_details['company'] = company.text if company else ''
+        job_details['application_link'] = self.base_url + \
+            application_link['href'] if application_link else ''
+        job_details['description'] = description.text if description else ''
+        job_details['job_id'] = application_link['data-job-id'] if application_link else ''
+
+        return job_details
