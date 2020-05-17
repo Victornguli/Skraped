@@ -131,7 +131,8 @@ class Glassdoor(ScraperBase):
             'job_link': job_url,
             'application_link': '',
             'description': '',
-            'job_id': ''
+            'job_id': '',
+            'source': 'Glassdoor'
         }
         title = soup.find('div', {'class': 'e11nt52q5'})
         company_container = [child for child in soup.find(
@@ -176,7 +177,7 @@ class Glassdoor(ScraperBase):
             lgr.info(
                 f'\nWriting Glassdoor results to file at {self.output_path}')
             csv_list = [[str(i['title']), str(i['company']), str(i['job_link']), i['application_link'], i['description'].encode(
-                'ascii', 'ignore').decode('utf-8').replace("\t", "\n"), i['job_id']] for i in job_info]
+                'ascii', 'ignore').decode('utf-8').replace("\t", "\n"), i['job_id'], i['source']] for i in job_info]
             with open(os.path.join(output_path, 'data.csv'), 'a+', encoding='utf-8') as f:
                 writer = csv.writer(f)
                 writer.writerow(
