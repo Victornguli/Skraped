@@ -35,3 +35,8 @@ def validate_and_parse_url(url):
 #         print(parent_path)
 #         return parent_path
 #     return None
+
+if __name__ == '__main__':
+    t = validate_and_parse_url(
+        "https://www.brightermonday.co.ke/job/uiux-designer-75xkjx")
+    print(t)

@@ -1,6 +1,7 @@
 import logging
 from bs4 import BeautifulSoup
 from skraped.scraper_base import ScraperBase
+from skraped.utils import validate_and_parse_url
 
 lgr = logging.getLogger()
 
@@ -40,7 +41,12 @@ class BrighterMonday(ScraperBase):
         if not job_links:
             lgr.error(
                 'Failed to retrieve any jobs link for Brighter Monday page results')
-        return len(job_links)
+        res = []
+        for link in job_links:
+            if link:
+                link_res = self.extract_job_details(link)
+                res.append(link_res)
+        return len(res)
 
     def get_pages(self, page_limit=1):
         """
@@ -87,7 +93,8 @@ class BrighterMonday(ScraperBase):
         job_links = []
         for page_idx, page in enumerate(pages_soup):
             # Search for prerender links first..
-            links = page.find_all('link', {'rel': 'prerender'})
+            link_tags = page.find_all('link', {'rel': 'prerender'})
+            links = [tag['href'] for tag in link_tags]
             if not links:
                 lgr.info(
                     'Job link fetch using prerender links for Brighter Monday page {} failed.. Switching to parsed html'.format(page_idx + 1))
@@ -119,6 +126,36 @@ class BrighterMonday(ScraperBase):
         @type job_url: str
         @return: The extracted job details
         """
+        res = self.send_request(job_url, 'get', return_raw=True)
+        if not res:
+            lgr.error(f'Get job details for {job_url} failed')
+            return None
+        soup = BeautifulSoup(res.text, 'lxml')
+        if not soup:
+            lgr.error(
+                'BeautifulSoup raw html parse using lxml for {job_url} failed')
+            return None
         job_details = {
-
+            'title': '',
+            'company': '',
+            'job_link': job_url,
+            'application_link': job_url,
+            'description': '',
+            'job_id': '',
+            'source': 'BrighterMonday'
         }
+        title = soup.find('h1', {'class': 'job-header__title'})
+        company = soup.find(
+            'div', {'class': ['if-wrapper-column', 'job-header__details']}).find('h2').find('a')
+        description = soup.find(
+            'div', {'class': ['job__details__user-edit', 'description-content__content']})
+        url_path = validate_and_parse_url(job_url)['path']
+        job_id = url_path.split("-")[-1] if url_path else None
+
+        job_details[title] = title.text if title else ''
+        job_details[company] = company.text if company else ''
+        job_details[description] = description if description else ''
+        job_details[job_id] = job_id
+
+        lgr.info(f'Success: Fetched details for {job_url}')
+        return job_details
