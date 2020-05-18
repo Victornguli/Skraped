@@ -61,9 +61,9 @@ class Glassdoor(ScraperBase):
                 # lgr.info('Retrived {} pages from Glassdoor'.format(len(pages)))
         return len(job_details)
 
-    def get_pages(self, page_limit=2):
+    def get_pages(self, page_limit=1):
         """
-        Retrieves each page upto the limit or last page if limit exceeds this.
+        Retrieves each job results page upto the specified limit.
         @param page_limit: The page limit to be applied when retrieving the pages
         @type page_limit: int
         """

@@ -4,6 +4,7 @@ from skraped.config.parser import parse_config
 from skraped.config.validate_config import validate_conf
 from skraped.scraper_base import ScraperBase
 from skraped.glassdoor import Glassdoor
+from skraped.brighter_monday import BrighterMonday
 
 
 lgr = logging.getLogger()
