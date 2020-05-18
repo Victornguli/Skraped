@@ -19,7 +19,7 @@ class BrighterMonday(ScraperBase):
             'q': self.config.get('keywords', '')
         }
         self.extra_headers = {}
-        self.page_limit = 2
+        self.page_limit = 5
 
     def scrape(self):
         """Entry point for the scraper"""
@@ -42,8 +42,6 @@ class BrighterMonday(ScraperBase):
                 'Failed to retrieve any jobs link for Brighter Monday page results')
         return len(job_links)
 
-        return len(pages)
-
     def get_pages(self, page_limit=1):
         """
         Retrieves each job results page upto the specified limit. 
@@ -64,8 +62,10 @@ class BrighterMonday(ScraperBase):
         if processed_pages:
             while processed_pages < page_limit:
                 res = self.send_request(
-                    self.url + 'page={}'.format(processed_pages + 1), 'get')
+                    self.url + '&page={}'.format(processed_pages + 1), 'get')
                 if res is None:
+                    lgr.info(
+                        'Brighter Monday page retrieval Done. Retrieved {} out of {}(limit) pages'.format(processed_pages, page_limit))
                     break
                 soup = BeautifulSoup(res, 'lxml')
                 pages.append(soup)
@@ -119,3 +119,6 @@ class BrighterMonday(ScraperBase):
         @type job_url: str
         @return: The extracted job details
         """
+        job_details = {
+
+        }

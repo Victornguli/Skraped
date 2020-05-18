@@ -29,7 +29,7 @@ class ScraperBase():
         raise NotImplementedError
 
     @staticmethod
-    def send_request(url, method):
+    def send_request(url, method, return_raw=False):
         """Sends an http request to the url using requests library"""
         try:
             ua = UserAgent()
@@ -55,7 +55,7 @@ class ScraperBase():
                 lgr.error(
                     f'Request to {url} return status code {resp.status_code}')
             else:
-                return resp.text
+                return resp if return_raw else resp.text
         except requests.ConnectionError as e:
             lgr.error(
                 'Connection Error. Make sure that you are connected to the internet and try again')
