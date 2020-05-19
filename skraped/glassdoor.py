@@ -148,7 +148,7 @@ class Glassdoor(ScraperBase):
             'ascii', 'ignore').decode('utf-8') if title else ''
         job_details['company'] = company_name.encode(
             'ascii', 'ignore').decode('utf-8') if company_name else ''
-        if hasattr(apply_btn, 'href'):
+        if hasattr(apply_btn, 'href') and apply_btn.name != 'button':
             application_link = apply_btn['href']
         elif hasattr(apply_btn, 'data-job-url'):
             application_link = apply_btn['data-job-url']

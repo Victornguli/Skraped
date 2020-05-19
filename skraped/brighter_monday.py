@@ -150,7 +150,7 @@ class BrighterMonday(ScraperBase):
         top_details = soup.find(
             'div', {'class': 'customer-card__content-segment'})
         description = soup.find(
-            'div', {'class': ['description-content__content']})
+            'div', {'class': 'description-content__content'})
         url_path = validate_and_parse_url(job_url)['path']
         job_id = url_path.split("-")[-1] if url_path else None
 
