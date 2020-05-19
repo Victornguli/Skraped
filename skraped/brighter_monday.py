@@ -67,7 +67,8 @@ class BrighterMonday(ScraperBase):
                 f'Fetched page {processed_pages} of Brighter Monday results')
         if processed_pages:
             while processed_pages < page_limit:
-                res = self.send_request('{}&page={}'.format(self.url, processed_pages + 1), 'get')
+                res = self.send_request('{}&page={}'.format(
+                    self.url, processed_pages + 1), 'get')
                 if res is None:
                     lgr.info(
                         'Brighter Monday page retrieval Done. Retrieved {} out of {}(limit) pages'.format(processed_pages, page_limit))
@@ -83,7 +84,7 @@ class BrighterMonday(ScraperBase):
     def get_job_links(self, pages_soup):
         """
         Retrieves job links from scraped pages. Searches for prerender link tags first and fallbacks
-        to searching through the parsed HTML(soup) for each page.
+        to searching through the parsed HTML(soup) of each page.
         @param pages_soup: The parsed HTML for each of the pages to be processed
         @type pages_soup: BeautifulSoup
         @return: List of the extracted job links
@@ -93,7 +94,7 @@ class BrighterMonday(ScraperBase):
         for page_idx, page in enumerate(pages_soup):
             # Search for prerender links first..
             link_tags = page.find_all('link', {'rel': 'prerender'})
-            links = [tag['href'] for tag in link_tags]
+            links = [tag['href'] for tag in link_tags if hasattr(tag, 'href')]
             if not links:
                 lgr.info(
                     'Job link fetch using prerender links for Brighter Monday page {} failed.. Switching to parsed html'.format(page_idx + 1))
@@ -113,8 +114,8 @@ class BrighterMonday(ScraperBase):
                     if not links:
                         lgr.error(
                             'Zero job links for Brighter Monday page {} retrieved'.format(page_idx + 1))
-                        continue  # Again, no need for extending the job_links list with an empty list
-            # I'm presuming by now links is not empty.. :)
+                        continue  # Again, nothing can be done past here.. just continue to the next, albeit with much skepticism :)
+            # I'm presuming by now links list for a single page is not empty.. :)
             job_links.extend(links)
         return job_links
 
