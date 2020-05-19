@@ -27,10 +27,11 @@ class Glassdoor(ScraperBase):
             'suggestCount': '0',
         }
         self.output_path = os.path.abspath(self.config.get('output_path'))
+        self.page_limit = 1  # Hardcoded for now.. fix with dynamic conf
 
     def scrape(self):
         """
-        Entry point for scraping Glassdoor
+        Entry point for Glassdoor scraper
         """
         first_query = self.query_params.popitem()
         self.url += str(first_query[0])+'=' + \
@@ -38,28 +39,23 @@ class Glassdoor(ScraperBase):
         for key, value in self.query_params.items():
             self.url += '&' + str(key)+'='+'+'.join(value.split(" "))
         lgr.info(f'Intitial query is {self.url}')
-        pages = self.get_pages(page_limit=2)
-        job_details = []
+        pages = self.get_pages(page_limit=self.page_limit)
+        res = []
 
         if pages:
             job_links = self.get_job_links(pages)
             if not job_links:
                 lgr.error(
-                    'Failed to retrieve the job links for Glassdoor search')
-                return job_details
+                    'Failed to retrieve job links from Glassdoor search page results')
+                return res
             for link in job_links:
                 lgr.info(f'Fetching details for {link}')
                 info = self.extract_job_details(link)
                 if not info:
                     lgr.error(f'Failed to retrieve details for {link}')
                     continue
-                job_details.append(info)
-            if job_details:
-                self.save_to_csv(job_details)
-            # with open('details.json', 'a+', encoding='utf-8') as f:
-            #     json.dump(job_details, f, indent=4)
-                # lgr.info('Retrived {} pages from Glassdoor'.format(len(pages)))
-        return len(job_details)
+                res.append(info)
+        return res
 
     def get_pages(self, page_limit=1):
         """
@@ -103,7 +99,8 @@ class Glassdoor(ScraperBase):
             links = page.find_all(
                 'a', {'class': ['jobInfoItem', 'jobTitle', 'jobLink']})
             if links:
-                links = map(lambda x: x['href'], links)
+                links = [link['href']
+                         for link in links if hasattr(link, 'href')]
                 for link in links:
                     if link not in job_links:
                         job_links.add(self.base_url + link)
@@ -151,9 +148,9 @@ class Glassdoor(ScraperBase):
             'ascii', 'ignore').decode('utf-8') if title else ''
         job_details['company'] = company_name.encode(
             'ascii', 'ignore').decode('utf-8') if company_name else ''
-        if getattr(apply_btn, 'href'):
+        if hasattr(apply_btn, 'href'):
             application_link = apply_btn['href']
-        elif getattr(apply_btn, 'data-job-url'):
+        elif hasattr(apply_btn, 'data-job-url'):
             application_link = apply_btn['data-job-url']
         else:
             application_link = ''
@@ -164,29 +161,3 @@ class Glassdoor(ScraperBase):
         job_details['job_id'] = apply_btn['data-job-id'] if apply_btn else ''
 
         return job_details
-
-    def save_to_csv(self, job_info):
-        """
-        Saves the job information list to the output csv file defined in the config
-        @param job_info: A list of job dictionaries each containing the job details
-        @type job_info: list
-        @return: Status to indicate that the details had been saved. 
-        """
-        try:
-            output_path = self.output_path
-            lgr.info(
-                f'\nWriting Glassdoor results to file at {self.output_path}')
-            csv_list = [[str(i['title']), str(i['company']), str(i['job_link']), i['application_link'], i['description'].encode(
-                'ascii', 'ignore').decode('utf-8').replace("\t", "\n"), i['job_id'], i['source']] for i in job_info]
-            with open(os.path.join(output_path, 'data.csv'), 'a+', encoding='utf-8') as f:
-                writer = csv.writer(f)
-                writer.writerow(
-                    ["TITLE", "COMPANY", "JOB LINK", "APPLICATION LINK", "DESCRIPTION", "JOB ID", "SOURCE"])
-                writer.writerows(csv_list)
-            lgr.info(f'\nSaved Glassdoor results')
-            return True
-        except Exception as e:
-            lgr.error(
-                f'\nFailed to save Glassdoor search results in csv file. Output path {self.output_path}')
-            print(str(e))
-        return False
