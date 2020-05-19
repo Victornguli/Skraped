@@ -67,8 +67,7 @@ class BrighterMonday(ScraperBase):
                 f'Fetched page {processed_pages} of Brighter Monday results')
         if processed_pages:
             while processed_pages < page_limit:
-                res = self.send_request(
-                    self.url + '&page={}'.format(processed_pages + 1), 'get')
+                res = self.send_request('{}&page={}'.format(self.url, processed_pages + 1), 'get')
                 if res is None:
                     lgr.info(
                         'Brighter Monday page retrieval Done. Retrieved {} out of {}(limit) pages'.format(processed_pages, page_limit))
