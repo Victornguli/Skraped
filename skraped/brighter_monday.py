@@ -20,7 +20,7 @@ class BrighterMonday(ScraperBase):
             'q': self.config.get('keywords', '')
         }
         self.extra_headers = {}
-        self.page_limit = 5
+        self.page_limit = 1
 
     def scrape(self):
         """Entry point for the scraper"""
@@ -46,7 +46,7 @@ class BrighterMonday(ScraperBase):
             if link:
                 link_res = self.extract_job_details(link)
                 res.append(link_res)
-        return len(res)
+        return res
 
     def get_pages(self, page_limit=1):
         """
@@ -147,15 +147,18 @@ class BrighterMonday(ScraperBase):
         title = soup.find('h1', {'class': 'job-header__title'})
         company = soup.find(
             'div', {'class': ['if-wrapper-column', 'job-header__details']}).find('h2').find('a')
+        top_details = soup.find(
+            'div', {'class': 'customer-card__content-segment'})
         description = soup.find(
-            'div', {'class': ['job__details__user-edit', 'description-content__content']})
+            'div', {'class': ['description-content__content']})
         url_path = validate_and_parse_url(job_url)['path']
         job_id = url_path.split("-")[-1] if url_path else None
 
-        job_details[title] = title.text if title else ''
-        job_details[company] = company.text if company else ''
-        job_details[description] = description if description else ''
-        job_details[job_id] = job_id
+        job_details['title'] = title.text if title else ''
+        job_details['company'] = company.text if company else ''
+        job_details['description'] = top_details.text if top_details else ''
+        job_details['description'] += description.text if description else ''
+        job_details['job_id'] = job_id
 
         lgr.info(f'Success: Fetched details for {job_url}')
         return job_details
