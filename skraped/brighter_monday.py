@@ -45,6 +45,8 @@ class BrighterMonday(ScraperBase):
         for link in job_links:
             if link:
                 link_res = self.extract_job_details(link)
+                if link_res is None:
+                    continue
                 res.append(link_res)
         return res
 
@@ -154,10 +156,11 @@ class BrighterMonday(ScraperBase):
         url_path = validate_and_parse_url(job_url)['path']
         job_id = url_path.split("-")[-1] if url_path else None
 
-        job_details['title'] = title.text if title else ''
-        job_details['company'] = company.text if company else ''
-        job_details['description'] = top_details.text if top_details else ''
-        job_details['description'] += description.text if description else ''
+        job_details['title'] = title.text.strip() if title else ''
+        job_details['company'] = company.text.strip() if company else ''
+        job_details['description'] = top_details.text.strip(
+        ) if top_details else ''
+        job_details['description'] += description.text.strip() if description else ''
         job_details['job_id'] = job_id
 
         lgr.info(f'Success: Fetched details for {job_url}')

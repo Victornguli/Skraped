@@ -39,6 +39,8 @@ def validate_output_path(path):
     if not path or not isinstance(path, str):
         raise ConfigError('path')
     if not os.path.exists(path):
+        os.mkdir(path)
+    if not os.path.exists(path):
         raise ConfigError('path')
 
 

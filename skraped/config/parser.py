@@ -31,7 +31,7 @@ def parse_cli_args():
         help='The keyword(s) to perform job search on')
 
     parser.add_argument(
-        '--sources',  dest='sources', nargs='*', required=False, help='The sources of the jobs to be scraped')
+        '--sources',  dest='sources', nargs='*', required=False, help='The sources of the jobs to be scraped. Currently supports BrighterMonday and Glassdoor')
 
     return parser.parse_args()
 
@@ -50,7 +50,7 @@ def parse_yaml_args():
 
 
 def parse_config():
-    """Parses the all config args, prioritizing cli args over those declared in settings.yml"""
+    """Parses all config args, prioritizing cli args over those declared in settings.yml"""
     cli_config = parse_cli_args()
     yaml_config = parse_yaml_args()
     config = yaml_config if yaml_config != {} else cli_config

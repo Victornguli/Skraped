@@ -70,15 +70,15 @@ def save_to_csv(data, config):
         output_path = config.get('output_path')
         if not os.path.exists("{}/{}".format(output_path, '{}.csv'.format(output_path))):
             # Write CSV File and the Header row first..
-            with open(os.path.join(output_path, 'data.csv'), 'w+', encoding='utf-8') as f:
+            with open(os.path.join(output_path, '{}.csv'.format(output_path)), 'w+', encoding='utf-8') as f:
                 writer = csv.writer(f)
                 writer.writerow(
                     ["TITLE", "COMPANY", "JOB LINK", "APPLICATION LINK", "DESCRIPTION", "JOB ID", "SOURCE"])
         lgr.info(
-            f'\nWriting results to file at {output_path}')
+            f'\nWriting results to file at {output_path}/{output_path}.csv')
         csv_list = [[str(i['title']), str(i['company']), str(i['job_link']), i['application_link'], i['description'].encode(
             'ascii', 'ignore').decode('utf-8').replace("\t", "\n"), i['job_id'], i['source']] for i in data]
-        with open(os.path.join(output_path, 'data.csv'), 'a+', encoding='utf-8') as f:
+        with open(os.path.join(output_path, '{}.csv'.format(output_path)), 'a+', encoding='utf-8') as f:
             writer = csv.writer(f)
             writer.writerows(csv_list)
         lgr.info(f'\nSaved results')

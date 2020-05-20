@@ -161,7 +161,7 @@ class Glassdoor(ScraperBase):
         job_details['application_link'] = (application_link).encode(
             'ascii', 'ignore').decode('utf-8')
         job_details['description'] = description.text.encode(
-            'ascii', 'ignore').decode('utf-8') if description else ''
+            'ascii', 'ignore').decode('utf-8').strip() if description else ''
         job_details['job_id'] = apply_btn['data-job-id'] if apply_btn else ''
 
         return job_details
