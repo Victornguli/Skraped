@@ -17,15 +17,6 @@ class ScraperBase():
 
     def scrape(self):
         """Entry Point to the execution of all scrape scources defined in the config"""
-        pass
-
-    def get_next_page(self, *args, **kwargs):
-        raise NotImplementedError
-
-    def extract_jobs_from_page(self, *args, **kwargs):
-        raise NotImplementedError
-
-    def extract_jobs_from_details(self, *args, **kwargs):
         raise NotImplementedError
 
     @staticmethod
@@ -62,7 +53,7 @@ class ScraperBase():
             print(str(e))
         except requests.Timeout as e:
             lgr.error(
-                'Timeout Error. Adjust your timeout value or try again later if this issue persists')
+                'Request timed out. Adjust your timeout value or try again later if this issue persists')
         except requests.RequestException as e:
             lgr.error(f'{method} request to {url} failed.')
             print(str(e))
