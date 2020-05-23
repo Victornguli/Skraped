@@ -1,5 +1,6 @@
 import os
 import csv
+import pickle
 import requests
 import logging
 
@@ -83,6 +84,43 @@ class ScraperBase():
             lgr.error(f"Failed to read csv file at {self.output_path}")
             print(str(ex))
         return saved_data
+
+    def save_pickle(self, scrape_data):
+        """
+        Saves scraped data in pickle format for easier filtering and restoring deleted csv files.
+        @param scraped_data: The list of scraped jobs
+        @type scraped_data: list
+        @return: Boolean to indicate the status of save pickle operation
+        @rtype: bool
+        """
+        try:
+            with open(f"{self.output_path}/{self.output_path}.pkl", "wb") as pickle_file:
+                pickle.dump(pickle_file, scrape_data)
+            lgr.info(
+                f"Dumped scraped pickle at {self.output_path} successfully")
+        except Exception as ex:
+            lgr.error(f"Failed to save pickle data at {self.output_path}")
+            print(str(ex))
+        return False
+
+    def load_pickle(self):
+        """
+        Loads scraped data from saved pickles.
+        @return: Scraped data dumped in the pickle
+        @rtype: list | None 
+        """
+        scrape_data = []
+        try:
+            with open(f"{self.output_path}/{self.output_path}.pkl", "rb") as pickle_file:
+                scrape_data = pickle.load(pickle_file)
+            lgr.info(
+                f"Loaded scrape_data from pickle at {self.output_path} successfully")
+            return scrape_data
+        except Exception as ex:
+            lgr.error(
+                f"Failed to load scrape_data from pickle data at {self.output_path}")
+            print(str(ex))
+        return scrape_data
 
     @staticmethod
     def send_request(url, method, return_raw=False):
