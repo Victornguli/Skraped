@@ -16,7 +16,7 @@ class ScraperBase():
 
     def __init__(self, config={}):
         self.config = config
-        self.output_path = self.config['output_path']
+        self.output_path = self.config.get('output_path', '')
 
     def scrape(self):
         """
@@ -61,12 +61,11 @@ class ScraperBase():
         saved_data = []
         try:
             with open(f"{self.output_path}/{self.output_path}.csv", "r") as saved_csv:
-                csv_reader = csv.DictReader(saved_csv, delimiter=",")
+                fieldnames = [
+                    "TITLE", "COMPANY", "JOB LINK", "APPLICATION LINK", "DESCRIPTION", "JOB ID"]
+                csv_reader = csv.DictReader(saved_csv, fieldnames=fieldnames)
                 line_count = 0
                 for row in csv_reader:
-                    if line_count == 0:  # Skip header row
-                        line_count += 1
-                        continue
                     saved_data.append({
                         "title": row["TITLE"], "company": row["COMPANY"], "job_link": row["JOB LINK"],
                         "application_link": row["APPLICATION LINK"], "description": row["DESCRIPTION"],
