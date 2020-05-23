@@ -25,7 +25,7 @@ class ScraperBase():
         """
         raise NotImplementedError
 
-    def save_to_csv(self, scrape_data):
+    def save_csv(self, scrape_data):
         """
         Saves scraped data to a csv file within the output path defined in config
         @param scrape_data: A list of job dictionaries each containing the job details
@@ -33,25 +33,26 @@ class ScraperBase():
         @return: Boolean to indicate that the status of the operation.
         """
         try:
-            output_path = self.output_path
-            if not os.path.exists("{}/{}".format(output_path, '{}.csv'.format(output_path))):
-                # Write CSV File and the Header row first..
-                with open(os.path.join(output_path, '{}.csv'.format(output_path)), 'w+', encoding='utf-8') as f:
-                    writer = csv.writer(f)
-                    writer.writerow(
-                        ["TITLE", "COMPANY", "JOB LINK", "APPLICATION LINK", "DESCRIPTION", "JOB ID", "SOURCE"])
             lgr.info(
-                f'\nWriting results to file at {output_path}/{output_path}.csv')
-            csv_list = [[str(i['title']), str(i['company']), str(i['job_link']), i['application_link'], i['description'].encode(
-                'ascii', 'ignore').decode('utf-8').replace("\t", "\n"), i['job_id'], i['source']] for i in scrape_data]
-            with open(os.path.join(output_path, '{}.csv'.format(output_path)), 'a+', encoding='utf-8') as f:
-                writer = csv.writer(f)
-                writer.writerows(csv_list)
+                f'\nWriting results to file at {self.output_path}/{self.output_path}.csv')
+
+            with open(f"{self.output_path}/{self.output_path}.csv", "w", encoding='utf-8') as f:
+                fieldnames = ["TITLE", "COMPANY", "JOB LINK",
+                              "APPLICATION LINK", "DESCRIPTION", "JOB ID", "SOURCE"]
+                writer = csv.DictWriter(f, fieldnames=fieldnames)
+                writer.writeheader()
+                for row in scrape_data:
+                    data = {
+                        "TITLE": row["title"], "COMPANY": row["company"], "JOB LINK": row["job_link"],
+                        "APPLICATION LINK": row["application_link"], "DESCRIPTION": row["description"],
+                        "JOB ID": row["job_id"], "SOURCE": row["source"]
+                    }
+                    writer.writerow(data)
             lgr.info(f'\nSaved results')
             return True
         except Exception as e:
             lgr.error(
-                f'\nFailed to save search results in csv file. Output path {output_path}')
+                f'\nFailed to save search results in csv file. Output path {self.output_path}/{self.output_path}.csv')
             print(str(e))
         return False
 
@@ -81,7 +82,8 @@ class ScraperBase():
                     "Read {} lines from {}".format(line_count - 1, self.output_path))
             return saved_data
         except Exception as ex:
-            lgr.error(f"Failed to read csv file at {self.output_path}")
+            lgr.error(
+                f"Failed to read csv file at {self.output_path}/{self.output_path}.csv")
             print(str(ex))
         return saved_data
 
@@ -95,11 +97,12 @@ class ScraperBase():
         """
         try:
             with open(f"{self.output_path}/{self.output_path}.pkl", "wb") as pickle_file:
-                pickle.dump(pickle_file, scrape_data)
+                pickle.dump(scrape_data, pickle_file)
             lgr.info(
-                f"Dumped scraped pickle at {self.output_path} successfully")
+                f"Dumped scraped pickle at {self.output_path}/{self.output_path}.pkl successfully")
         except Exception as ex:
-            lgr.error(f"Failed to save pickle data at {self.output_path}")
+            lgr.error(
+                f"Failed to save pickle data at {self.output_path}/{self.output_path}.pkl")
             print(str(ex))
         return False
 
@@ -131,8 +134,12 @@ class ScraperBase():
         @rtype: list
         """
         try:
-            csv_data = self.load_csv().update(scrape_data)
-            return csv_data
+            csv_data = self.load_csv()
+            dups = {i["job_id"]: i for i in csv_data}
+            for job in scrape_data:
+                dups[job["job_id"]] = job
+            scrape_data = [dups[key] for key in dups]
+            return scrape_data
         except Exception as ex:
             lgr.error("Failed to merge scraped data")
             print(str(ex))

@@ -33,11 +33,11 @@ def main():
                 f'Failed to retrieve the Scraper Class {scraper}. Exiting...')
             sys.exit()
         data = get_class_method(class_instance, 'scrape')()
-        scrape_data.append(data)
+        scrape_data += data
 
-    base.merge_scrape_data(scrape_data)
+    scrape_data = base.merge_scrape_data(scrape_data)
     base.save_pickle(scrape_data)
-    base.save_to_csv(scrape_data)
+    base.save_csv(scrape_data)
     return
 
 
