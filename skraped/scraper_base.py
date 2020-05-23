@@ -122,6 +122,22 @@ class ScraperBase():
             print(str(ex))
         return scrape_data
 
+    def merge_scrape_data(self, scrape_data):
+        """
+        Merges scraped data with data from the saved csv   
+        @param scrape_data: Current scrape data
+        @type scrape_data: list
+        @return: Merged scrape data. Avoids saving data with duplicate ids to the csv file
+        @rtype: list
+        """
+        try:
+            csv_data = self.load_csv().update(scrape_data)
+            return csv_data
+        except Exception as ex:
+            lgr.error("Failed to merge scraped data")
+            print(str(ex))
+        return scrape_data
+
     @staticmethod
     def send_request(url, method, return_raw=False):
         """Sends an http request to the url using requests library"""

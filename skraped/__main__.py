@@ -24,6 +24,7 @@ def main():
     validate_conf(config)
     base = ScraperBase(config)
     scraper_classes = config.get('sources')
+    scrape_data = []
     # return config
     for scraper in scraper_classes:
         class_instance = get_class_instance(scraper, config=config)
@@ -31,8 +32,13 @@ def main():
             lgr.error(
                 f'Failed to retrieve the Scraper Class {scraper}. Exiting...')
             sys.exit()
-        res = get_class_method(class_instance, 'scrape')()
-        base.save_to_csv(res)
+        data = get_class_method(class_instance, 'scrape')()
+        scrape_data.append(data)
+
+    base.merge_scrape_data(scrape_data)
+    base.save_pickle(scrape_data)
+    base.save_to_csv(scrape_data)
+    return
 
 
 def get_class_instance(class_name, **kwargs):
