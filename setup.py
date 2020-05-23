@@ -1,6 +1,6 @@
 from setuptools import setup, find_packages
 
-from skraper import __version__ as version
+from skraped import __version__ as version
 
 description = 'CLI tool for scraping and aggregating Kenyan tech job posted on various job boards'
 url = 'https://github.com/Victornguli/Skraped'

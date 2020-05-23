@@ -1,3 +1,5 @@
+import os
+import csv
 import requests
 import logging
 
@@ -16,8 +18,40 @@ class ScraperBase():
         self.config = config
 
     def scrape(self):
-        """Entry Point to the execution of all scrape scources defined in the config"""
+        """
+        Entry Point to the execution of all scrape scources defined in the config
+        """
         raise NotImplementedError
+
+    def save_to_csv(self, scrape_data):
+        """
+        Saves scraped data to a csv file within the output path defined in config
+        @param scrape_data: A list of job dictionaries each containing the job details
+        @type scrape_data: list
+        @return: Boolean to indicate that the status of the operation. 
+        """
+        try:
+            output_path = self.config.get('output_path')
+            if not os.path.exists("{}/{}".format(output_path, '{}.csv'.format(output_path))):
+                # Write CSV File and the Header row first..
+                with open(os.path.join(output_path, '{}.csv'.format(output_path)), 'w+', encoding='utf-8') as f:
+                    writer = csv.writer(f)
+                    writer.writerow(
+                        ["TITLE", "COMPANY", "JOB LINK", "APPLICATION LINK", "DESCRIPTION", "JOB ID", "SOURCE"])
+            lgr.info(
+                f'\nWriting results to file at {output_path}/{output_path}.csv')
+            csv_list = [[str(i['title']), str(i['company']), str(i['job_link']), i['application_link'], i['description'].encode(
+                'ascii', 'ignore').decode('utf-8').replace("\t", "\n"), i['job_id'], i['source']] for i in scrape_data]
+            with open(os.path.join(output_path, '{}.csv'.format(output_path)), 'a+', encoding='utf-8') as f:
+                writer = csv.writer(f)
+                writer.writerows(csv_list)
+            lgr.info(f'\nSaved results')
+            return True
+        except Exception as e:
+            lgr.error(
+                f'\nFailed to save search results in csv file. Output path {output_path}')
+            print(str(e))
+        return False
 
     @staticmethod
     def send_request(url, method, return_raw=False):
