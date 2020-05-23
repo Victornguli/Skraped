@@ -57,19 +57,24 @@ class ScraperBase():
     def load_csv(self):
         """
         Loads existing csv file from the path specified in the config
+        @return: Saved csv data
+        @rtype: list | None
         """
         saved_data = []
         try:
             with open(f"{self.output_path}/{self.output_path}.csv", "r") as saved_csv:
                 fieldnames = [
-                    "TITLE", "COMPANY", "JOB LINK", "APPLICATION LINK", "DESCRIPTION", "JOB ID"]
+                    "TITLE", "COMPANY", "JOB LINK", "APPLICATION LINK", "DESCRIPTION", "JOB ID", "SOURCE"]
                 csv_reader = csv.DictReader(saved_csv, fieldnames=fieldnames)
                 line_count = 0
                 for row in csv_reader:
+                    if line_count == 0:  # Skip header row
+                        line_count += 1
+                        continue
                     saved_data.append({
                         "title": row["TITLE"], "company": row["COMPANY"], "job_link": row["JOB LINK"],
                         "application_link": row["APPLICATION LINK"], "description": row["DESCRIPTION"],
-                        "job_id": row["JOB ID"]})
+                        "job_id": row["JOB ID"], "source": row["SOURCE"]})
                     line_count += 1
                 lgr.info(
                     "Read {} lines from {}".format(line_count - 1, self.output_path))
