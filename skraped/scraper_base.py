@@ -16,6 +16,7 @@ class ScraperBase():
 
     def __init__(self, config={}):
         self.config = config
+        self.output_path = self.config['output_path']
 
     def scrape(self):
         """
@@ -28,10 +29,10 @@ class ScraperBase():
         Saves scraped data to a csv file within the output path defined in config
         @param scrape_data: A list of job dictionaries each containing the job details
         @type scrape_data: list
-        @return: Boolean to indicate that the status of the operation. 
+        @return: Boolean to indicate that the status of the operation.
         """
         try:
-            output_path = self.config.get('output_path')
+            output_path = self.output_path
             if not os.path.exists("{}/{}".format(output_path, '{}.csv'.format(output_path))):
                 # Write CSV File and the Header row first..
                 with open(os.path.join(output_path, '{}.csv'.format(output_path)), 'w+', encoding='utf-8') as f:
@@ -52,6 +53,32 @@ class ScraperBase():
                 f'\nFailed to save search results in csv file. Output path {output_path}')
             print(str(e))
         return False
+
+    def load_csv(self):
+        """
+        Loads existing csv file from the path specified in the config
+        """
+        saved_data = []
+        try:
+            with open(f"{self.output_path}/{self.output_path}.csv", "r") as saved_csv:
+                csv_reader = csv.DictReader(saved_csv, delimiter=",")
+                line_count = 0
+                for row in csv_reader:
+                    if line_count == 0:  # Skip header row
+                        line_count += 1
+                        continue
+                    saved_data.append({
+                        "title": row["TITLE"], "company": row["COMPANY"], "job_link": row["JOB LINK"],
+                        "application_link": row["APPLICATION LINK"], "description": row["DESCRIPTION"],
+                        "job_id": row["JOB ID"]})
+                    line_count += 1
+                lgr.info(
+                    "Read {} lines from {}".format(line_count - 1, self.output_path))
+            return saved_data
+        except Exception as ex:
+            lgr.error(f"Failed to read csv file at {self.output_path}")
+            print(str(ex))
+        return saved_data
 
     @staticmethod
     def send_request(url, method, return_raw=False):
