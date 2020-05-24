@@ -26,12 +26,33 @@ def validate_and_parse_url(url):
     return None
 
 
-# def get_project_root():
-#     """
-#     Retrieves the full path of the root path for the project
-#     """
-#     parent_path = os.path.dirname(os.path.dirname(__file__))
-#     if os.path.exists(parent_path):
-#         print(parent_path)
-#         return parent_path
-#     return None
+def get_job_id(url, source):
+    """
+    Retrieves a job_id from the job url. Works for sources which job links have the job_id as a param
+    @param url: The job link to extract job id from
+    @type url: str
+    @param source: The job source identifier
+    @type source: str
+    @return: The extracted job_id or None if not found
+    @rtype: str | None
+    """
+    print(url)
+    parsed_url = validate_and_parse_url(url)
+    if parsed_url is None:
+        return None
+    if source == "glassdoor":
+        job_url = parsed_url.get("query")
+        if job_url:
+            # Retrieve each query_param as key:val pairs
+            try:
+                parsed_params = {x.split("=")[0]:x.split("=")[1] for x in job_url.split('&')}
+                if parsed_params:
+                    return parsed_params.get("jobListingId", None)
+            except IndexError:
+                pass
+    elif source == "brightermonday":
+        try:
+            return parsed_url.get("path").split("-")[-1]
+        except IndexError:
+            pass
+    return None
