@@ -36,7 +36,6 @@ def get_job_id(url, source):
     @return: The extracted job_id or None if not found
     @rtype: str | None
     """
-    print(url)
     parsed_url = validate_and_parse_url(url)
     if parsed_url is None:
         return None

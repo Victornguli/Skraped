@@ -47,7 +47,7 @@ class Glassdoor(ScraperBase):
                 lgr.error(
                     'Failed to retrieve job links from Glassdoor search page results')
                 return res
-            job_links = self.run_pre_scrape_filters(job_links, source = "glassdoor")
+            job_links = self.run_pre_scrape_filters(job_links, source="glassdoor")
             for link in job_links:
                 lgr.info(f'Fetching details for {link}')
                 info = self.extract_job_details(link)

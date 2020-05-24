@@ -6,7 +6,7 @@ import logging
 
 from bs4 import BeautifulSoup
 from fake_useragent import UserAgent
-from skraped.utils import validate_and_parse_url
+from skraped.utils import validate_and_parse_url, get_job_id
 
 lgr = logging.getLogger()
 
@@ -157,17 +157,7 @@ class ScraperBase():
         @rtype list 
         """
         res = []
-        if source == "glassdoor":
-            job_ids = []
-            for link in job_links:
-                u = validate_and_parse_url(link)
-                query_params = [x.split("=") for x in u.get(
-                    'query').split(',')[0].split('&')]
-                res = {a[0]: a[1] for a in query_params}
-                job_ids.append(res.get("jobListingId"))
-        elif source == "brightermonday":
-            job_ids = [validate_and_parse_url(link).get(
-                'path').split('-')[-1] for link in job_links]
+        job_ids = [get_job_id(url, source) for url in job_links]
         try:
             ids = [post["job_id"] for post in self.load_csv()]
             if ids:
