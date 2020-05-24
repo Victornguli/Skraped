@@ -6,6 +6,7 @@ import logging
 
 from bs4 import BeautifulSoup
 from fake_useragent import UserAgent
+from skraped.utils import validate_and_parse_url
 
 lgr = logging.getLogger()
 
@@ -64,7 +65,7 @@ class ScraperBase():
         """
         saved_data = []
         try:
-            with open(f"{self.output_path}/{self.output_path}.csv", "r") as saved_csv:
+            with open(f"{self.output_path}/{self.output_path}.csv", "r", encoding="utf-8") as saved_csv:
                 fieldnames = [
                     "TITLE", "COMPANY", "JOB LINK", "APPLICATION LINK", "DESCRIPTION", "JOB ID", "SOURCE"]
                 csv_reader = csv.DictReader(saved_csv, fieldnames=fieldnames)
@@ -144,6 +145,39 @@ class ScraperBase():
             lgr.error("Failed to merge scraped data")
             print(str(ex))
         return scrape_data
+
+    def run_pre_scrape_filters(self, job_links, source):
+        """
+        Runs filters for job links before scraping each job post.
+        @param job_links: List of job links scraped from the search result pages
+        @type job_links: list
+        @return: Filtered job_links list
+        @param source: The job link source
+        @type source: str
+        @rtype list 
+        """
+        res = []
+        if source == "glassdoor":
+            job_ids = []
+            for link in job_links:
+                u = validate_and_parse_url(link)
+                query_params = [x.split("=") for x in u.get(
+                    'query').split(',')[0].split('&')]
+                res = {a[0]: a[1] for a in query_params}
+                job_ids.append(res.get("jobListingId"))
+        elif source == "brightermonday":
+            job_ids = [validate_and_parse_url(link).get(
+                'path').split('-')[-1] for link in job_links]
+        try:
+            ids = [post["job_id"] for post in self.load_csv()]
+            if ids:
+                res = [job_id for job_id in job_ids if job_id not in ids]
+                # lgr.info("Found {} duplicates for {}".format(
+                #     len(ids) - len(res), source))
+            return res
+        except Exception:
+            lgr.info("Failed to filter job_ids")
+        return res
 
     @staticmethod
     def send_request(url, method, return_raw=False):

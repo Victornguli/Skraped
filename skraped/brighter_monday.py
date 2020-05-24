@@ -42,6 +42,8 @@ class BrighterMonday(ScraperBase):
             lgr.error(
                 'Failed to retrieve any jobs link for Brighter Monday page results')
         res = []
+        job_links = self.run_pre_scrape_filters(
+            job_links, source="brightermonday")
         for link in job_links:
             if link:
                 link_res = self.extract_job_details(link)

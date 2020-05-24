@@ -26,7 +26,6 @@ class Glassdoor(ScraperBase):
             'clickSource': 'searchBtn',
             'suggestCount': '0',
         }
-        self.output_path = os.path.abspath(self.config.get('output_path'))
         self.page_limit = 1  # Hardcoded for now.. fix with dynamic conf
 
     def scrape(self):
@@ -48,6 +47,7 @@ class Glassdoor(ScraperBase):
                 lgr.error(
                     'Failed to retrieve job links from Glassdoor search page results')
                 return res
+            job_links = self.run_pre_scrape_filters(job_links, source = "glassdoor")
             for link in job_links:
                 lgr.info(f'Fetching details for {link}')
                 info = self.extract_job_details(link)
