@@ -56,4 +56,5 @@ def parse_config():
     for k, v in cli_config.__dict__.items():
         if v is not None:
             config[k] = v
+    config["keywords"] = " ".join(config["keywords"])
     return config
