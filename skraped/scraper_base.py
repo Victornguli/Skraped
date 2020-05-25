@@ -18,7 +18,7 @@ class ScraperBase():
 
     def __init__(self, config={}):
         self.config = config
-        self.output_path = self.config.get('output_path', '')
+        self.output_path = self.config.get('output_path')
 
     def scrape(self):
         """
@@ -34,10 +34,9 @@ class ScraperBase():
         @return: Boolean to indicate that the status of the operation.
         """
         try:
-            lgr.info(
-                f'\nWriting results to file at {self.output_path}/{self.output_path}.csv')
+            lgr.info(f'\nWriting csv file to {self.output_path}')
 
-            with open(f"{self.output_path}/{self.output_path}.csv", "w", encoding='utf-8') as f:
+            with open(os.path.join(self.output_path, "data.csv"), "w", encoding='utf-8') as f:
                 fieldnames = ["TITLE", "COMPANY", "JOB LINK",
                               "APPLICATION LINK", "DESCRIPTION", "JOB ID", "SOURCE"]
                 writer = csv.DictWriter(f, fieldnames=fieldnames)
@@ -53,7 +52,7 @@ class ScraperBase():
             return True
         except Exception as e:
             lgr.error(
-                f'\nFailed to save search results in csv file. Output path {self.output_path}/{self.output_path}.csv')
+                f'\nFailed to save search results in csv file. Output path {self.output_path}')
             print(str(e))
         return False
 
@@ -65,7 +64,7 @@ class ScraperBase():
         """
         saved_data = []
         try:
-            with open(f"{self.output_path}/{self.output_path}.csv", "r", encoding="utf-8") as saved_csv:
+            with open(os.path.join(self.output_path, "data.csv"), "r", encoding="utf-8") as saved_csv:
                 fieldnames = [
                     "TITLE", "COMPANY", "JOB LINK", "APPLICATION LINK", "DESCRIPTION", "JOB ID", "SOURCE"]
                 csv_reader = csv.DictReader(saved_csv, fieldnames=fieldnames)
@@ -79,12 +78,10 @@ class ScraperBase():
                         "application_link": row["APPLICATION LINK"], "description": row["DESCRIPTION"],
                         "job_id": row["JOB ID"], "source": row["SOURCE"]})
                     line_count += 1
-                lgr.info(
-                    "Read {} lines from {}".format(line_count - 1, self.output_path))
             return saved_data
         except Exception as ex:
             lgr.error(
-                f"Failed to read csv file at {self.output_path}/{self.output_path}.csv")
+                f"Failed to read csv file at {self.output_path}")
             print(str(ex))
         return saved_data
 
@@ -97,13 +94,13 @@ class ScraperBase():
         @rtype: bool
         """
         try:
-            with open(f"{self.output_path}/{self.output_path}.pkl", "wb") as pickle_file:
+            with open(os.path.join(self.output_path, "data.pkl"), "wb") as pickle_file:
                 pickle.dump(scrape_data, pickle_file)
             lgr.info(
-                f"Dumped scraped pickle at {self.output_path}/{self.output_path}.pkl successfully")
+                f"Dumped scraped pickle at {self.output_path} successfully")
         except Exception as ex:
             lgr.error(
-                f"Failed to save pickle data at {self.output_path}/{self.output_path}.pkl")
+                f"Failed to save pickle data at {self.output_path}")
             print(str(ex))
         return False
 
@@ -115,7 +112,7 @@ class ScraperBase():
         """
         scrape_data = []
         try:
-            with open(f"{self.output_path}/{self.output_path}.pkl", "rb") as pickle_file:
+            with open(os.path.join(self.output_path, "data.pkl"), "rb") as pickle_file:
                 scrape_data = pickle.load(pickle_file)
             lgr.info(
                 f"Loaded scrape_data from pickle at {self.output_path} successfully")
@@ -157,11 +154,13 @@ class ScraperBase():
         @rtype list 
         """
         res = []
-        job_ids = [get_job_id(url, source) for url in job_links]
+        job_ids = {get_job_id(job_link, source)
+                              : job_link for job_link in job_links}
         try:
-            ids = [post["job_id"] for post in self.load_csv()]
+            ids = [job["job_id"] for job in self.load_csv()]
             if ids:
-                res = [job_id for job_id in job_ids if job_id not in ids]
+                res = [job_ids[job_id]
+                       for job_id in job_ids if job_id not in ids]
                 # lgr.info("Found {} duplicates for {}".format(
                 #     len(ids) - len(res), source))
             return res
