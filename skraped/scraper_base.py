@@ -133,7 +133,7 @@ class ScraperBase():
         """
         try:
             csv_data = self.load_csv()
-            dups = {i["job_id"]: i for i in csv_data}
+            dups = dict((i["job_id"], i) for i in csv_data)
             for job in scrape_data:
                 dups[job["job_id"]] = job
             scrape_data = [dups[key] for key in dups]

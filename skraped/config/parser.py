@@ -44,7 +44,7 @@ def parse_yaml_args(settings_path=''):
     else:
         lgr.error(
             'Missing settings.yaml file. Add settings.yaml to the root directory of the project')
-    raise FileNotFoundError(f"Settings file '{settings_path}' does not exist")
+    raise FileNotFoundError(f"Settings file {settings_path} does not exist")
 
 
 def parse_config():
@@ -56,5 +56,5 @@ def parse_config():
     for k, v in cli_config.__dict__.items():
         if v is not None:
             config[k] = v
-    config["keywords"] = " ".join(config["keywords"])
+    config["keywords"] = "".join(config["keywords"])
     return config
