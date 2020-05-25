@@ -9,12 +9,6 @@ lgr = logging.getLogger()
 
 SETTINGS_PATH = './settings.yaml'
 
-CONFIG_MAPPING = {
-    'o': 'output_path',
-    'kw': 'keywords',
-    'sources': 'sources'
-}
-
 
 def parse_cli_args():
     """Parses arguments passed through cli"""
