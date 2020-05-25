@@ -5,9 +5,11 @@ lgr = logging.getLogger()
 
 
 VALID_CONFIG = {
-    'output_path': './',
-    'sources': ['Linkedin', 'BrighterMonday', 'Glassdoor'],
-    'keywords': 'Python Developer'
+    'output_path': (str, ''),
+    'log_path': (str, ''),
+    'sources': (list, ['Linkedin', 'BrighterMonday', 'Glassdoor']),
+    'keywords': (str, ''),
+    'settings': (str, '')
 }
 
 
@@ -25,23 +27,26 @@ class ConfigError(Exception):
             return f'ConfigError: the configuration passed is invalid'
 
 
-def validate_sources(sources):
+def validate_sources(sources, conf):
     """Validates the sources"""
-    if not isinstance(sources, list) or not sources:
+    if not isinstance(sources, VALID_CONFIG['sources'][0]) or not sources:
         raise ConfigError('sources')
     for source in sources:
-        if source not in VALID_CONFIG['sources']:
+        if source not in VALID_CONFIG['sources'][1]:
             raise ConfigError('sources')
 
 
-def validate_output_path(path):
+def validate_output_path(path, config):
     """Validates the output path defined"""
-    if not path or not isinstance(path, str):
+    if not path or not isinstance(path, VALID_CONFIG['output_path'][0]):
         raise ConfigError('path')
+    output_path = path
     if not os.path.exists(path):
         os.mkdir(path)
     if not os.path.exists(path):
         raise ConfigError('path')
+    normalized_path = os.path.abspath(output_path)
+    config['output_path'] = normalized_path
 
 
 def validate_conf(conf):
@@ -49,9 +54,5 @@ def validate_conf(conf):
     for conf_item in conf:
         if conf_item not in VALID_CONFIG:
             raise ConfigError(conf_item)
-    validate_sources(conf.get('sources', []))
-    validate_output_path(conf.get('output_path', ''))
-
-
-if __name__ == '__main__':
-    validate_output_path('./data')
+    validate_sources(conf.get('sources', []), conf)
+    validate_output_path(conf.get('output_path', ''), conf)
