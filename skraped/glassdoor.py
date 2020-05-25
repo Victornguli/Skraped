@@ -18,8 +18,8 @@ class Glassdoor(ScraperBase):
         self.url = 'https://www.glassdoor.com/Job/jobs.htm?'
         self.query_params = {
             'jobType': '',
-            'typedKeyword': self.config.get('keywords'),
-            'sc.keyword': self.config.get('keywords').lower(),
+            'typedKeyword': " ".join(self.config.get('keywords')),
+            'sc.keyword': " ".join(self.config.get('keywords')).lower(),
             'locT': 'N',
             'locId': '130',
             'suggestChosen': 'false',
@@ -47,7 +47,8 @@ class Glassdoor(ScraperBase):
                 lgr.error(
                     'Failed to retrieve job links from Glassdoor search page results')
                 return res
-            job_links = self.run_pre_scrape_filters(job_links, source="glassdoor")
+            job_links = self.run_pre_scrape_filters(
+                job_links, source="glassdoor")
             for link in job_links:
                 lgr.info(f'Fetching details for {link}')
                 info = self.extract_job_details(link)

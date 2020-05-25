@@ -17,7 +17,7 @@ class BrighterMonday(ScraperBase):
         self.url = 'https://www.brightermonday.co.ke/jobs/it-software'
         self.query_params = {
             'page': 1,
-            'q': self.config.get('keywords', '')
+            'q': " ".join(self.config.get('keywords', ''))
         }
         self.extra_headers = {}
         self.page_limit = 1
