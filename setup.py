@@ -30,7 +30,11 @@ setup(
     license='MIT License',
     python_requires='>=3.6.0',
     install_requires=requires,
-    packages=find_packages(exclude='tests'),
+    packages=find_packages(exclude=['tests']),
+    package_data={
+        # Install settings.yaml for loading default settings
+        'skraped': ["config/*.yaml"]
+    },
     include_package_data=True,
     entry_points={'console_scripts': ['skraper=skraped.__main__:main']}
 )
