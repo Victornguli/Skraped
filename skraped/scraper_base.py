@@ -3,6 +3,8 @@ import csv
 import pickle
 import requests
 import logging
+import random
+import time
 
 from bs4 import BeautifulSoup
 from fake_useragent import UserAgent
@@ -154,18 +156,17 @@ class ScraperBase():
         @rtype list 
         """
         res = []
-        job_ids = {get_job_id(job_link, source)
-                              : job_link for job_link in job_links}
+        job_ids = dict((get_job_id(job_link, source), job_link) for job_link in job_links)
         try:
-            ids = [job["job_id"] for job in self.load_csv()]
+            ids = [job["job_id"] for job in self.load_csv() if job["source"].lower() == source]
+            res = [job_ids[job_id] for job_id in job_ids if job_id not in ids]
             if ids:
-                res = [job_ids[job_id]
-                       for job_id in job_ids if job_id not in ids]
-                # lgr.info("Found {} duplicates for {}".format(
-                #     len(ids) - len(res), source))
+                dups = max(len(ids), len(res)) - min(len(ids), len(res)) 
+                lgr.info("Found {} saved ids out of the {} scraped ids for source {}".format(dups, len(job_ids), source))
             return res
-        except Exception:
+        except Exception as e:
             lgr.info("Failed to filter job_ids")
+            print(str(e))
         return res
 
     @staticmethod
@@ -184,6 +185,8 @@ class ScraperBase():
             proxies = {
                 'https': ''
             }
+            # sleep_seconds = random.randrange(2, 10)
+            # time.sleep(sleep_seconds)
             req = requests.get  # Defaults the HTTP method to get
             try:
                 req = getattr(requests, method.lower())

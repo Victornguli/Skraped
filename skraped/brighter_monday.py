@@ -13,7 +13,7 @@ class BrighterMonday(ScraperBase):
         super().__init__(config)
         self.base_url = 'https://www.brightermonday.co.ke'
         self.alturl = 'https://www.brightermonday.co.ke/jobs'
-        # Provides accurate results for IT Jobs
+        # Provides more accurate results for IT Jobs
         self.url = 'https://www.brightermonday.co.ke/jobs/it-software'
         self.query_params = {
             'page': 1,
@@ -25,8 +25,7 @@ class BrighterMonday(ScraperBase):
     def scrape(self):
         """Entry point for the scraper"""
         main_query = self.query_params.popitem()
-        self.url += '?' + main_query[0] + '=' + \
-            ("+").join(main_query[1].split(" "))
+        self.url += '?' + main_query[0] + '=' + ("+").join(main_query[1].split(" "))
         for param in self.query_params:
             if param != 'page':
                 self.url += "&" + param + "=" + \
@@ -96,7 +95,7 @@ class BrighterMonday(ScraperBase):
         """
         job_links = []
         for page_idx, page in enumerate(pages_soup):
-            # Search for prerender links first..
+            # Search for prerender links tags first..
             link_tags = page.find_all('link', {'rel': 'prerender'})
             links = [tag['href'] for tag in link_tags if hasattr(tag, 'href')]
             if not links:
@@ -118,8 +117,7 @@ class BrighterMonday(ScraperBase):
                     if not links:
                         lgr.error(
                             'Zero job links for Brighter Monday page {} retrieved'.format(page_idx + 1))
-                        continue  # Again, nothing can be done past here.. just continue to the next, albeit with much skepticism :)
-            # I'm presuming by now links list for a single page is not empty.. :)
+                        continue
             job_links.extend(links)
         return job_links
 
@@ -160,8 +158,7 @@ class BrighterMonday(ScraperBase):
 
         job_details['title'] = title.text.strip() if title else ''
         job_details['company'] = company.text.strip() if company else ''
-        job_details['description'] = top_details.text.strip(
-        ) if top_details else ''
+        job_details['description'] = top_details.text.strip() if top_details else ''
         job_details['description'] += description.text.strip() if description else ''
         job_details['job_id'] = job_id
 
