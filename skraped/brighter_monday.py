@@ -21,6 +21,7 @@ class BrighterMonday(ScraperBase):
         }
         self.extra_headers = {}
         self.page_limit = 1
+        self.scrape_data = []
 
     def scrape(self):
         """Entry point for the scraper"""
@@ -42,7 +43,8 @@ class BrighterMonday(ScraperBase):
                 'Failed to retrieve any jobs link for Brighter Monday page results')
         job_links = self.run_pre_scrape_filters(
             job_links, source="brightermonday")
-        return super().process_job_details(job_links, "extract_job_details", self)
+        super().thread_executor(job_links, "extract_job_details", self)
+        return self.scrape_data
         # return res
 
     def get_pages(self, page_limit=1):

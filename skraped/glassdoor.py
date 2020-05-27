@@ -27,6 +27,7 @@ class Glassdoor(ScraperBase):
             'suggestCount': '0',
         }
         self.page_limit = 1  # Hardcoded for now.. fix with dynamic conf
+        self.scrape_data = []
 
     def scrape(self):
         """
@@ -45,8 +46,8 @@ class Glassdoor(ScraperBase):
                     'Failed to retrieve job links from Glassdoor search page results')
                 return []
             job_links = self.run_pre_scrape_filters(job_links, source="glassdoor")
-            return super().process_job_details(job_links, "extract_job_details", self)
-        return []
+            super().thread_executor(job_links, "extract_job_details", self)
+        return self.scrape_data
 
     def get_pages(self, page_limit=1):
         """

@@ -81,7 +81,7 @@ class ScraperBase():
                     line_count += 1
             return saved_data
         except FileNotFoundError:
-            lgr.info(f"No existing csv file found at {self.output_path}")
+            lgr.info(f"No existing csv file found {self.output_path}")
         return saved_data
 
     def save_pickle(self, scrape_data):
@@ -155,7 +155,7 @@ class ScraperBase():
         res = []
         job_ids = dict((get_job_id(job_link, source), job_link) for job_link in job_links)
         try:
-            ids = [job["job_id"] for job in self.load_csv() if job["source"].lower() == source]
+            ids = [job["job_id"] for job in self.load_csv() if job["source"] and job["source"].lower() == source]
             res = [job_ids[job_id] for job_id in job_ids if job_id not in ids and job_id is not None]
             dups = len(job_ids) - len(res) 
             lgr.info("Found {} saved ids out of the {} scraped ids for source {} \n".format(dups, len(job_ids), source))
@@ -207,7 +207,7 @@ class ScraperBase():
             print(str(e))
         return None
 
-    def process_job_details(self, job_links, target_method, class_instance):
+    def process_job_details(self, job_link, target_method, class_instance):
         """
         Calls the appropriate class method for the scraper to query, parse and process
         each job post's details from the scraped job_links.
@@ -221,15 +221,25 @@ class ScraperBase():
         """
         try:
             method_instance = getattr(class_instance, target_method)
-            res = []
         except AttributeError as e:
             lgr.error(f"Method {target_method} does not exist in {class_instance} scraper class")
             print(e)
         else:
-            if job_links:
-                for job_link in job_links:
-                    details = method_instance(job_link)
-                    res.append(details)
-                    lgr.info(f"Fetched {job_link} succesfully")
+            if job_link:
+                details = method_instance(job_link)
+                getattr(class_instance, 'scrape_data').append(details)
+                lgr.info(f"Fetched {job_link} succesfully")
+                # return details
 
-        return res
+    def thread_executor(self, job_links, target_method, class_instance):
+        threads = []
+        for link in job_links:
+            thread = threading.Thread(target = self.process_job_details, args = [link, target_method, class_instance])
+            threads.append(thread)
+        
+        for thread in threads:
+            thread.start()
+        
+        for thread in threads:
+            thread.join()
+        return
