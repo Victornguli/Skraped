@@ -159,10 +159,9 @@ class ScraperBase():
         job_ids = dict((get_job_id(job_link, source), job_link) for job_link in job_links)
         try:
             ids = [job["job_id"] for job in self.load_csv() if job["source"].lower() == source]
-            res = [job_ids[job_id] for job_id in job_ids if job_id not in ids]
-            if ids:
-                dups = max(len(ids), len(res)) - min(len(ids), len(res)) 
-                lgr.info("Found {} saved ids out of the {} scraped ids for source {}".format(dups, len(job_ids), source))
+            res = [job_ids[job_id] for job_id in job_ids if job_id not in ids and job_id is not None]
+            dups = len(job_ids) - len(res) 
+            lgr.info("Found {} saved ids out of the {} scraped ids for source {}".format(dups, len(job_ids), source))
             return res
         except Exception as e:
             lgr.info("Failed to filter job_ids")
