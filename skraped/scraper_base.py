@@ -80,10 +80,8 @@ class ScraperBase():
                         "job_id": row["JOB ID"], "source": row["SOURCE"]})
                     line_count += 1
             return saved_data
-        except Exception as ex:
-            lgr.error(
-                f"Failed to read csv file at {self.output_path}")
-            print(str(ex))
+        except FileNotFoundError:
+            lgr.info(f"No existing csv file found at {self.output_path}")
         return saved_data
 
     def save_pickle(self, scrape_data):
@@ -235,7 +233,3 @@ class ScraperBase():
                     lgr.info(f"Fetched {job_link} succesfully")
 
         return res
-
-    @staticmethod
-    def get_class_instance():
-        pass
