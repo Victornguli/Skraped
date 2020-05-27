@@ -156,5 +156,4 @@ class BrighterMonday(ScraperBase):
         job_details['description'] += description.text.strip() if description else ''
         job_details['job_id'] = job_id
 
-        lgr.info(f'Success: Fetched details for {job_url}')
         return job_details
