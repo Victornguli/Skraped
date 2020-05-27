@@ -1,6 +1,6 @@
 import logging
 from bs4 import BeautifulSoup
-from skraped.scraper_base import ScraperBase
+from .scraper_base import ScraperBase
 from skraped.utils import validate_and_parse_url
 
 lgr = logging.getLogger()
@@ -21,6 +21,7 @@ class BrighterMonday(ScraperBase):
         }
         self.extra_headers = {}
         self.page_limit = 1
+        self.scrape_data = []
 
     def scrape(self):
         """Entry point for the scraper"""
@@ -40,16 +41,11 @@ class BrighterMonday(ScraperBase):
         if not job_links:
             lgr.error(
                 'Failed to retrieve any jobs link for Brighter Monday page results')
-        res = []
         job_links = self.run_pre_scrape_filters(
             job_links, source="brightermonday")
-        for link in job_links:
-            if link:
-                link_res = self.extract_job_details(link)
-                if link_res is None:
-                    continue
-                res.append(link_res)
-        return res
+        super().thread_executor(job_links, "extract_job_details", self)
+        return self.scrape_data
+        # return res
 
     def get_pages(self, page_limit=1):
         """
@@ -162,5 +158,4 @@ class BrighterMonday(ScraperBase):
         job_details['description'] += description.text.strip() if description else ''
         job_details['job_id'] = job_id
 
-        lgr.info(f'Success: Fetched details for {job_url}')
         return job_details

@@ -2,12 +2,15 @@ import os
 import sys
 import logging
 import csv
+import time
 from skraped.config.parser import parse_config
 from skraped.config.validate_config import validate_conf
 from skraped.scraper_base import ScraperBase
 from skraped.glassdoor import Glassdoor
 from skraped.brighter_monday import BrighterMonday
 
+
+t_start = time.perf_counter()
 
 lgr = logging.getLogger()
 lgr.setLevel('INFO')
@@ -32,12 +35,14 @@ def main():
             lgr.error(
                 f'Failed to retrieve the Scraper Class {scraper}. Exiting...')
             sys.exit()
-        data = get_class_method(class_instance, 'scrape')()
-        scrape_data += data
+        scrape_data.extend(get_class_method(class_instance, 'scrape')())
 
     scrape_data = base.merge_scrape_data(scrape_data)
     base.save_pickle(scrape_data)
     base.save_csv(scrape_data)
+
+    t_end = time.perf_counter()
+    lgr.info("Complete!! Skraper ran for {} second(s)".format(round(t_end - t_start, 2)))
     return
 
 

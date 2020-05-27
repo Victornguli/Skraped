@@ -27,6 +27,7 @@ class Glassdoor(ScraperBase):
             'suggestCount': '0',
         }
         self.page_limit = 1  # Hardcoded for now.. fix with dynamic conf
+        self.scrape_data = []
 
     def scrape(self):
         """
@@ -37,25 +38,16 @@ class Glassdoor(ScraperBase):
             '+'.join(first_query[1].split(" "))
         for key, value in self.query_params.items():
             self.url += '&' + str(key)+'='+'+'.join(value.split(" "))
-        lgr.info(f'Intitial query is {self.url}')
         pages = self.get_pages(page_limit=self.page_limit)
-        res = []
-
         if pages:
             job_links = self.get_job_links(pages)
             if not job_links:
                 lgr.error(
                     'Failed to retrieve job links from Glassdoor search page results')
-                return res
+                return []
             job_links = self.run_pre_scrape_filters(job_links, source="glassdoor")
-            for link in job_links:
-                lgr.info(f'Fetching details for {link}')
-                info = self.extract_job_details(link)
-                if not info:
-                    lgr.error(f'Failed to retrieve details for {link}')
-                    continue
-                res.append(info)
-        return res
+            super().thread_executor(job_links, "extract_job_details", self)
+        return self.scrape_data
 
     def get_pages(self, page_limit=1):
         """
@@ -99,8 +91,7 @@ class Glassdoor(ScraperBase):
             links = page.find_all(
                 'a', {'class': ['jobInfoItem', 'jobTitle', 'jobLink']})
             if links:
-                links = [link['href']
-                         for link in links if hasattr(link, 'href')]
+                links = [link['href'] for link in links if hasattr(link, 'href')]
                 for link in links:
                     if link not in job_links:
                         job_links.add(self.base_url + link)

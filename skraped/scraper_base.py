@@ -5,10 +5,11 @@ import requests
 import logging
 import random
 import time
+import threading
 
 from bs4 import BeautifulSoup
 from fake_useragent import UserAgent
-from skraped.utils import validate_and_parse_url, get_job_id
+from .utils import validate_and_parse_url, get_job_id
 
 lgr = logging.getLogger()
 
@@ -36,8 +37,6 @@ class ScraperBase():
         @return: Boolean to indicate that the status of the operation.
         """
         try:
-            lgr.info(f'\nWriting csv file to {self.output_path}')
-
             with open(os.path.join(self.output_path, "data.csv"), "w", encoding='utf-8') as f:
                 fieldnames = ["TITLE", "COMPANY", "JOB LINK",
                               "APPLICATION LINK", "DESCRIPTION", "JOB ID", "SOURCE"]
@@ -50,7 +49,7 @@ class ScraperBase():
                         "JOB ID": row["job_id"], "SOURCE": row["source"]
                     }
                     writer.writerow(data)
-            lgr.info(f'\nSaved results')
+            lgr.info(f"Saved results to {self.output_path} successfully.")
             return True
         except Exception as e:
             lgr.error(
@@ -81,10 +80,8 @@ class ScraperBase():
                         "job_id": row["JOB ID"], "source": row["SOURCE"]})
                     line_count += 1
             return saved_data
-        except Exception as ex:
-            lgr.error(
-                f"Failed to read csv file at {self.output_path}")
-            print(str(ex))
+        except FileNotFoundError:
+            lgr.info(f"No existing csv file found {self.output_path}")
         return saved_data
 
     def save_pickle(self, scrape_data):
@@ -158,10 +155,10 @@ class ScraperBase():
         res = []
         job_ids = dict((get_job_id(job_link, source), job_link) for job_link in job_links)
         try:
-            ids = [job["job_id"] for job in self.load_csv() if job["source"].lower() == source]
+            ids = [job["job_id"] for job in self.load_csv() if job["source"] and job["source"].lower() == source]
             res = [job_ids[job_id] for job_id in job_ids if job_id not in ids and job_id is not None]
             dups = len(job_ids) - len(res) 
-            lgr.info("Found {} saved ids out of the {} scraped ids for source {}".format(dups, len(job_ids), source))
+            lgr.info("Found {} saved ids out of the {} scraped ids for source {} \n".format(dups, len(job_ids), source))
             return res
         except Exception as e:
             lgr.info("Failed to filter job_ids")
@@ -209,3 +206,40 @@ class ScraperBase():
             lgr.error(f'{method} request to {url} failed.')
             print(str(e))
         return None
+
+    def process_job_details(self, job_link, target_method, class_instance):
+        """
+        Calls the appropriate class method for the scraper to query, parse and process
+        each job post's details from the scraped job_links.
+        @param job_links: A list of job_links to process
+        @type job_links: list
+        @param target_method: The target class method to be called. This method performs the actual details extraction
+        @type target_method: str
+        @param class_instance: An instance of the scraper class calling this method
+        @type class_instance: class
+        @return: Boolean
+        """
+        try:
+            method_instance = getattr(class_instance, target_method)
+        except AttributeError as e:
+            lgr.error(f"Method {target_method} does not exist in {class_instance} scraper class")
+            print(e)
+        else:
+            if job_link:
+                details = method_instance(job_link)
+                getattr(class_instance, 'scrape_data').append(details)
+                lgr.info(f"Fetched {job_link} succesfully")
+                # return details
+
+    def thread_executor(self, job_links, target_method, class_instance):
+        threads = []
+        for link in job_links:
+            thread = threading.Thread(target = self.process_job_details, args = [link, target_method, class_instance])
+            threads.append(thread)
+        
+        for thread in threads:
+            thread.start()
+        
+        for thread in threads:
+            thread.join()
+        return
