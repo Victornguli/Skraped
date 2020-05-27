@@ -44,7 +44,7 @@ def get_job_id(url, source):
         if job_url:
             # Retrieve each query_param as key:val pairs
             try:
-                parsed_params = dict((x.split("=")) for x in job_url.split('&'))
+                parsed_params = dict(x.split("=") for x in job_url.split('&'))
                 if parsed_params:
                     return parsed_params.get("jobListingId", None)
             except IndexError:
