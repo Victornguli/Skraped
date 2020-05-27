@@ -39,7 +39,7 @@ def get_job_id(url, source):
     parsed_url = validate_and_parse_url(url)
     if parsed_url is None:
         return None
-    if source == "glassdoor":
+    if source.lower() == "glassdoor":
         job_url = parsed_url.get("query")
         if job_url:
             # Retrieve each query_param as key:val pairs
@@ -49,7 +49,7 @@ def get_job_id(url, source):
                     return parsed_params.get("jobListingId", None)
             except IndexError:
                 pass
-    elif source == "brightermonday":
+    elif source.lower() == "brightermonday":
         try:
             return parsed_url.get("path").split("-")[-1]
         except IndexError:
