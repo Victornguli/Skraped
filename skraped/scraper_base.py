@@ -5,10 +5,11 @@ import requests
 import logging
 import random
 import time
+import threading
 
 from bs4 import BeautifulSoup
 from fake_useragent import UserAgent
-from skraped.utils import validate_and_parse_url, get_job_id
+from .utils import validate_and_parse_url, get_job_id
 
 lgr = logging.getLogger()
 
@@ -36,8 +37,6 @@ class ScraperBase():
         @return: Boolean to indicate that the status of the operation.
         """
         try:
-            lgr.info(f'\nWriting csv file to {self.output_path}')
-
             with open(os.path.join(self.output_path, "data.csv"), "w", encoding='utf-8') as f:
                 fieldnames = ["TITLE", "COMPANY", "JOB LINK",
                               "APPLICATION LINK", "DESCRIPTION", "JOB ID", "SOURCE"]
@@ -50,7 +49,7 @@ class ScraperBase():
                         "JOB ID": row["job_id"], "SOURCE": row["source"]
                     }
                     writer.writerow(data)
-            lgr.info(f'\nSaved results')
+            lgr.info(f"Saved results to {self.output_path} successfully.")
             return True
         except Exception as e:
             lgr.error(
@@ -161,7 +160,7 @@ class ScraperBase():
             ids = [job["job_id"] for job in self.load_csv() if job["source"].lower() == source]
             res = [job_ids[job_id] for job_id in job_ids if job_id not in ids and job_id is not None]
             dups = len(job_ids) - len(res) 
-            lgr.info("Found {} saved ids out of the {} scraped ids for source {}".format(dups, len(job_ids), source))
+            lgr.info("Found {} saved ids out of the {} scraped ids for source {} \n".format(dups, len(job_ids), source))
             return res
         except Exception as e:
             lgr.info("Failed to filter job_ids")
@@ -209,3 +208,34 @@ class ScraperBase():
             lgr.error(f'{method} request to {url} failed.')
             print(str(e))
         return None
+
+    def process_job_details(self, job_links, target_method, class_instance):
+        """
+        Calls the appropriate class method for the scraper to query, parse and process
+        each job post's details from the scraped job_links.
+        @param job_links: A list of job_links to process
+        @type job_links: list
+        @param target_method: The target class method to be called. This method performs the actual details extraction
+        @type target_method: str
+        @param class_instance: An instance of the scraper class calling this method
+        @type class_instance: class
+        @return: Boolean
+        """
+        try:
+            method_instance = getattr(class_instance, target_method)
+            res = []
+        except AttributeError as e:
+            lgr.error(f"Method {target_method} does not exist in {class_instance} scraper class")
+            print(e)
+        else:
+            if job_links:
+                for job_link in job_links:
+                    details = method_instance(job_link)
+                    res.append(details)
+                    lgr.info(f"Fetched {job_link} succesfully")
+
+        return res
+
+    @staticmethod
+    def get_class_instance():
+        pass
