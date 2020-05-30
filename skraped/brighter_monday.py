@@ -124,6 +124,7 @@ class BrighterMonday(ScraperBase):
         @type job_url: str
         @return: The extracted job details
         """
+        lgr.info(f"Processing {job_url}")
         res = self.send_request(job_url, 'get', return_raw=True)
         if not res:
             lgr.error(f'Get job details for {job_url} failed')
@@ -157,5 +158,5 @@ class BrighterMonday(ScraperBase):
         job_details['description'] = top_details.text.strip() if top_details else ''
         job_details['description'] += description.text.strip() if description else ''
         job_details['job_id'] = job_id
-
+        
         return job_details

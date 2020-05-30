@@ -3,7 +3,7 @@ import logging
 import json
 import csv
 from bs4 import BeautifulSoup
-from skraped.scraper_base import ScraperBase
+from .scraper_base import ScraperBase
 
 lgr = logging.getLogger()
 
@@ -104,6 +104,7 @@ class Glassdoor(ScraperBase):
         @type job_url: str
         @return: The extracted job details
         """
+        lgr.info(f"Processing {job_url}")
         res = self.send_request(job_url, 'get')
         if not res:
             lgr.error(f'{job_url} details request returned None')
