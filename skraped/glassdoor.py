@@ -3,7 +3,7 @@ import logging
 import json
 import csv
 from bs4 import BeautifulSoup
-from skraped.scraper_base import ScraperBase
+from .scraper_base import ScraperBase
 
 lgr = logging.getLogger()
 
@@ -46,7 +46,7 @@ class Glassdoor(ScraperBase):
                     'Failed to retrieve job links from Glassdoor search page results')
                 return []
             job_links = self.run_pre_scrape_filters(job_links, source="glassdoor")
-            super().thread_executor(job_links, "extract_job_details", self)
+            super().process_job_details(job_links, "extract_job_details", self)
         return self.scrape_data
 
     def get_pages(self, page_limit=1):
@@ -104,6 +104,7 @@ class Glassdoor(ScraperBase):
         @type job_url: str
         @return: The extracted job details
         """
+        lgr.info(f"Processing {job_url}")
         res = self.send_request(job_url, 'get')
         if not res:
             lgr.error(f'{job_url} details request returned None')

@@ -43,7 +43,7 @@ class BrighterMonday(ScraperBase):
                 'Failed to retrieve any jobs link for Brighter Monday page results')
         job_links = self.run_pre_scrape_filters(
             job_links, source="brightermonday")
-        super().thread_executor(job_links, "extract_job_details", self)
+        super().process_job_details(job_links, "extract_job_details", self)
         return self.scrape_data
         # return res
 
@@ -124,6 +124,7 @@ class BrighterMonday(ScraperBase):
         @type job_url: str
         @return: The extracted job details
         """
+        lgr.info(f"Processing {job_url}")
         res = self.send_request(job_url, 'get', return_raw=True)
         if not res:
             lgr.error(f'Get job details for {job_url} failed')
@@ -157,5 +158,5 @@ class BrighterMonday(ScraperBase):
         job_details['description'] = top_details.text.strip() if top_details else ''
         job_details['description'] += description.text.strip() if description else ''
         job_details['job_id'] = job_id
-
+        
         return job_details

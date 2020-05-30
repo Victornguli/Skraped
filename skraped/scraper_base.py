@@ -6,14 +6,13 @@ import logging
 import random
 import time
 import threading
+from concurrent.futures import ThreadPoolExecutor, as_completed
 
 from bs4 import BeautifulSoup
 from fake_useragent import UserAgent
 from .utils import validate_and_parse_url, get_job_id
 
 lgr = logging.getLogger()
-
-# TODO: Add a base requests method/config to be used by each scraper class
 
 
 class ScraperBase():
@@ -37,20 +36,21 @@ class ScraperBase():
         @return: Boolean to indicate that the status of the operation.
         """
         try:
-            with open(os.path.join(self.output_path, "data.csv"), "w", encoding='utf-8') as f:
-                fieldnames = ["TITLE", "COMPANY", "JOB LINK",
-                              "APPLICATION LINK", "DESCRIPTION", "JOB ID", "SOURCE"]
-                writer = csv.DictWriter(f, fieldnames=fieldnames)
-                writer.writeheader()
-                for row in scrape_data:
-                    data = {
-                        "TITLE": row["title"], "COMPANY": row["company"], "JOB LINK": row["job_link"],
-                        "APPLICATION LINK": row["application_link"], "DESCRIPTION": row["description"],
-                        "JOB ID": row["job_id"], "SOURCE": row["source"]
-                    }
-                    writer.writerow(data)
-            lgr.info(f"Saved results to {self.output_path} successfully.")
-            return True
+            if scrape_data:
+                with open(os.path.join(self.output_path, "data.csv"), "w", encoding='utf-8') as f:
+                    fieldnames = ["TITLE", "COMPANY", "JOB LINK",
+                                "APPLICATION LINK", "DESCRIPTION", "JOB ID", "SOURCE"]
+                    writer = csv.DictWriter(f, fieldnames=fieldnames)
+                    writer.writeheader()
+                    for row in scrape_data:
+                        data = {
+                            "TITLE": row["title"], "COMPANY": row["company"], "JOB LINK": row["job_link"],
+                            "APPLICATION LINK": row["application_link"], "DESCRIPTION": row["description"],
+                            "JOB ID": row["job_id"], "SOURCE": row["source"]
+                        }
+                        writer.writerow(data)
+                lgr.info(f"Saved results to {self.output_path} successfully.")
+                return True
         except Exception as e:
             lgr.error(
                 f'\nFailed to save search results in csv file. Output path {self.output_path}')
@@ -93,10 +93,11 @@ class ScraperBase():
         @rtype: bool
         """
         try:
-            with open(os.path.join(self.output_path, "data.pkl"), "wb") as pickle_file:
-                pickle.dump(scrape_data, pickle_file)
-            lgr.info(
-                f"Dumped scraped pickle at {self.output_path} successfully")
+            if scrape_data:
+                with open(os.path.join(self.output_path, "data.pkl"), "wb") as pickle_file:
+                    pickle.dump(scrape_data, pickle_file)
+                lgr.info(
+                    f"Dumped scraped pickle at {self.output_path} successfully")
         except Exception as ex:
             lgr.error(
                 f"Failed to save pickle data at {self.output_path}")
@@ -131,12 +132,13 @@ class ScraperBase():
         @rtype: list
         """
         try:
-            csv_data = self.load_csv()
-            dups = dict((i["job_id"], i) for i in csv_data)
-            for job in scrape_data:
-                dups[job["job_id"]] = job
-            scrape_data = [dups[key] for key in dups]
-            return scrape_data
+            if scrape_data:
+                csv_data = self.load_csv()
+                dups = dict((i["job_id"], i) for i in csv_data)
+                for job in scrape_data:
+                    dups[job["job_id"]] = job
+                scrape_data = [dups[key] for key in dups]
+                return scrape_data
         except Exception as ex:
             lgr.error("Failed to merge scraped data")
             print(str(ex))
@@ -207,39 +209,29 @@ class ScraperBase():
             print(str(e))
         return None
 
-    def process_job_details(self, job_link, target_method, class_instance):
+    def process_job_details(self, job_links, target_method, class_instance, **kwargs):
         """
-        Calls the appropriate class method for the scraper to query, parse and process
-        each job post's details from the scraped job_links.
-        @param job_links: A list of job_links to process
+        Manages multi-threaded calls for each job_link scraping process
+        @param job_links: List of job_links to be scraped
         @type job_links: list
-        @param target_method: The target class method to be called. This method performs the actual details extraction
+        @param target_method: The method for scraping the job link. Implemented within each scraper class
         @type target_method: str
-        @param class_instance: An instance of the scraper class calling this method
+        @param class_instance: The instance of the scraper class calling this method
         @type class_instance: class
-        @return: Boolean
+        @param kwargs: Extra key-value pair args to be passed to the target method
         """
-        try:
-            method_instance = getattr(class_instance, target_method)
-        except AttributeError as e:
-            lgr.error(f"Method {target_method} does not exist in {class_instance} scraper class")
-            print(e)
-        else:
-            if job_link:
-                details = method_instance(job_link)
-                getattr(class_instance, 'scrape_data').append(details)
-                lgr.info(f"Fetched {job_link} succesfully")
-                # return details
-
-    def thread_executor(self, job_links, target_method, class_instance):
-        threads = []
-        for link in job_links:
-            thread = threading.Thread(target = self.process_job_details, args = [link, target_method, class_instance])
-            threads.append(thread)
-        
-        for thread in threads:
-            thread.start()
-        
-        for thread in threads:
-            thread.join()
+        if job_links:
+            with ThreadPoolExecutor(max_workers = 100) as executor:
+                try:
+                    method_instance = getattr(class_instance, target_method)
+                except AttributeError as e:
+                    lgr.error(f"Method {target_method} does not exist in {class_instance} scraper class")
+                    print(e)
+                else:
+                    results = []
+                    futures = [executor.submit(method_instance, link, **kwargs) for link in job_links]
+                    for future in as_completed(futures):
+                        res = future.result()
+                        results.append(res)
+                    getattr(class_instance, 'scrape_data').extend(results) # Extend scrape_data instance for that scraper class
         return
