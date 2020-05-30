@@ -134,7 +134,7 @@ class ScraperBase():
         try:
             if scrape_data:
                 csv_data = self.load_csv()
-                dups = dict((i["job_id"], i) for i in csv_data)
+                dups = dict((i["job_id"], i) for i in csv_data) if csv_data else {}
                 for job in scrape_data:
                     dups[job["job_id"]] = job
                 scrape_data = [dups[key] for key in dups]
