@@ -209,21 +209,7 @@ class ScraperBase():
             print(str(e))
         return None
 
-    def process_job_details(self, job_link, target_method, class_instance, **kwargs):
-        """
-        Calls the appropriate class method for the scraper to query, parse and process
-        each job post's details from the scraped job_links.
-        @param job_links: A list of job_links to process
-        @type job_links: list
-        @param target_method: The target class method to be called. This method performs the actual details extraction
-        @type target_method: str
-        @param class_instance: An instance of the scraper class calling this method
-        @type class_instance: class
-        @param kwargs: Extra key-value arguments to be passed to the target method
-        """
-
-
-    def thread_executor(self, job_links, target_method, class_instance, **kwargs):
+    def process_job_details(self, job_links, target_method, class_instance, **kwargs):
         """
         Manages multi-threaded calls for each job_link scraping process
         @param job_links: List of job_links to be scraped
