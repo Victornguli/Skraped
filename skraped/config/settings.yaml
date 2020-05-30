@@ -11,3 +11,5 @@ sources:
 
 # Search keywords to be submitted during the search
 keywords: "Software Developer"
+
+delay: 2

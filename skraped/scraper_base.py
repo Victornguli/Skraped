@@ -134,7 +134,7 @@ class ScraperBase():
         try:
             if scrape_data:
                 csv_data = self.load_csv()
-                dups = dict((i["job_id"], i) for i in csv_data)
+                dups = dict((i["job_id"], i) for i in csv_data) if csv_data else {}
                 for job in scrape_data:
                     dups[job["job_id"]] = job
                 scrape_data = [dups[key] for key in dups]
@@ -183,8 +183,6 @@ class ScraperBase():
             proxies = {
                 'https': ''
             }
-            # sleep_seconds = random.randrange(2, 10)
-            # time.sleep(sleep_seconds)
             req = requests.get  # Defaults the HTTP method to get
             try:
                 req = getattr(requests, method.lower())
@@ -209,27 +207,28 @@ class ScraperBase():
             print(str(e))
         return None
 
-    def process_job_details(self, job_links, target_method, class_instance, **kwargs):
+    def process_job_details(self, class_instance, target_method, job_links, **kwargs):
         """
-        Manages multi-threaded calls for each job_link scraping process
-        @param job_links: List of job_links to be scraped
-        @type job_links: list
-        @param target_method: The method for scraping the job link. Implemented within each scraper class
-        @type target_method: str
+        Manages a pool of multi-threaded calls to each job_link scraper function
         @param class_instance: The instance of the scraper class calling this method
         @type class_instance: class
+        @param target_method: The method for scraping the job link. Implemented within each scraper class
+        @type target_method: str
+        @param job_links: List of job_links to be scraped
+        @type job_links: list
         @param kwargs: Extra key-value pair args to be passed to the target method
         """
         if job_links:
-            with ThreadPoolExecutor(max_workers = 100) as executor:
+            with ThreadPoolExecutor() as executor:
                 try:
                     method_instance = getattr(class_instance, target_method)
                 except AttributeError as e:
                     lgr.error(f"Method {target_method} does not exist in {class_instance} scraper class")
                     print(e)
                 else:
+                    delay = kwargs.pop('delay', 0)
                     results = []
-                    futures = [executor.submit(method_instance, link, **kwargs) for link in job_links]
+                    futures = [executor.submit(method_instance, link, delay = random.randrange(delay, 10), **kwargs) for link in job_links]
                     for future in as_completed(futures):
                         res = future.result()
                         results.append(res)
