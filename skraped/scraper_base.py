@@ -37,20 +37,21 @@ class ScraperBase():
         @return: Boolean to indicate that the status of the operation.
         """
         try:
-            with open(os.path.join(self.output_path, "data.csv"), "w", encoding='utf-8') as f:
-                fieldnames = ["TITLE", "COMPANY", "JOB LINK",
-                              "APPLICATION LINK", "DESCRIPTION", "JOB ID", "SOURCE"]
-                writer = csv.DictWriter(f, fieldnames=fieldnames)
-                writer.writeheader()
-                for row in scrape_data:
-                    data = {
-                        "TITLE": row["title"], "COMPANY": row["company"], "JOB LINK": row["job_link"],
-                        "APPLICATION LINK": row["application_link"], "DESCRIPTION": row["description"],
-                        "JOB ID": row["job_id"], "SOURCE": row["source"]
-                    }
-                    writer.writerow(data)
-            lgr.info(f"Saved results to {self.output_path} successfully.")
-            return True
+            if scrape_data:
+                with open(os.path.join(self.output_path, "data.csv"), "w", encoding='utf-8') as f:
+                    fieldnames = ["TITLE", "COMPANY", "JOB LINK",
+                                "APPLICATION LINK", "DESCRIPTION", "JOB ID", "SOURCE"]
+                    writer = csv.DictWriter(f, fieldnames=fieldnames)
+                    writer.writeheader()
+                    for row in scrape_data:
+                        data = {
+                            "TITLE": row["title"], "COMPANY": row["company"], "JOB LINK": row["job_link"],
+                            "APPLICATION LINK": row["application_link"], "DESCRIPTION": row["description"],
+                            "JOB ID": row["job_id"], "SOURCE": row["source"]
+                        }
+                        writer.writerow(data)
+                lgr.info(f"Saved results to {self.output_path} successfully.")
+                return True
         except Exception as e:
             lgr.error(
                 f'\nFailed to save search results in csv file. Output path {self.output_path}')
@@ -93,10 +94,11 @@ class ScraperBase():
         @rtype: bool
         """
         try:
-            with open(os.path.join(self.output_path, "data.pkl"), "wb") as pickle_file:
-                pickle.dump(scrape_data, pickle_file)
-            lgr.info(
-                f"Dumped scraped pickle at {self.output_path} successfully")
+            if scrape_data:
+                with open(os.path.join(self.output_path, "data.pkl"), "wb") as pickle_file:
+                    pickle.dump(scrape_data, pickle_file)
+                lgr.info(
+                    f"Dumped scraped pickle at {self.output_path} successfully")
         except Exception as ex:
             lgr.error(
                 f"Failed to save pickle data at {self.output_path}")
@@ -131,12 +133,13 @@ class ScraperBase():
         @rtype: list
         """
         try:
-            csv_data = self.load_csv()
-            dups = dict((i["job_id"], i) for i in csv_data)
-            for job in scrape_data:
-                dups[job["job_id"]] = job
-            scrape_data = [dups[key] for key in dups]
-            return scrape_data
+            if scrape_data:
+                csv_data = self.load_csv()
+                dups = dict((i["job_id"], i) for i in csv_data)
+                for job in scrape_data:
+                    dups[job["job_id"]] = job
+                scrape_data = [dups[key] for key in dups]
+                return scrape_data
         except Exception as ex:
             lgr.error("Failed to merge scraped data")
             print(str(ex))
@@ -207,7 +210,7 @@ class ScraperBase():
             print(str(e))
         return None
 
-    def process_job_details(self, job_link, target_method, class_instance):
+    def process_job_details(self, job_link, target_method, class_instance, **kwargs):
         """
         Calls the appropriate class method for the scraper to query, parse and process
         each job post's details from the scraped job_links.
@@ -217,6 +220,7 @@ class ScraperBase():
         @type target_method: str
         @param class_instance: An instance of the scraper class calling this method
         @type class_instance: class
+        @param kwargs: Extra key-value arguments to be passed to the target method
         @return: Boolean
         """
         try:
@@ -226,15 +230,15 @@ class ScraperBase():
             print(e)
         else:
             if job_link:
-                details = method_instance(job_link)
+                details = method_instance(job_link, **kwargs)
                 getattr(class_instance, 'scrape_data').append(details)
                 lgr.info(f"Fetched {job_link} succesfully")
                 # return details
 
-    def thread_executor(self, job_links, target_method, class_instance):
+    def thread_executor(self, job_links, target_method, class_instance, **kwargs):
         threads = []
         for link in job_links:
-            thread = threading.Thread(target = self.process_job_details, args = [link, target_method, class_instance])
+            thread = threading.Thread(target = self.process_job_details, args = [link, target_method, class_instance], kwargs = kwargs)
             threads.append(thread)
         
         for thread in threads:
