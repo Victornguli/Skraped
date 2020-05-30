@@ -1,6 +1,5 @@
 import logging
 import time
-import random
 from bs4 import BeautifulSoup
 from .scraper_base import ScraperBase
 from skraped.utils import validate_and_parse_url
@@ -46,7 +45,7 @@ class BrighterMonday(ScraperBase):
                 'Failed to retrieve any jobs link for Brighter Monday page results')
         job_links = self.run_pre_scrape_filters(
             job_links, source="brightermonday")
-        super().process_job_details(job_links, "extract_job_details", self)
+        super().process_job_details(self, "extract_job_details", job_links, delay = self.sleep_seconds)
         return self.scrape_data
         # return res
 
@@ -120,14 +119,17 @@ class BrighterMonday(ScraperBase):
             job_links.extend(links)
         return job_links
 
-    def extract_job_details(self, job_url):
+    def extract_job_details(self, job_url, delay = 0, **kwargs):
         """
         Extracts job details from each job link
         @param job_url: A link/url to the job details page
         @type job_url: str
+        @param delay: A value in seconds to delay this scraper operation
+        @type delay: int
+        @param kwargs: Extra key-value pair arguments to be passed
         @return: The extracted job details
+        @rtype: dict
         """
-        delay = random.randrange(self.sleep_seconds, 10)
         time.sleep(delay)
         lgr.info(f"Delay: {delay}s. Processing {job_url}")
         res = self.send_request(job_url, 'get', return_raw=True)

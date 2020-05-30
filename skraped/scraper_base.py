@@ -207,29 +207,29 @@ class ScraperBase():
             print(str(e))
         return None
 
-    def process_job_details(self, job_links, target_method, class_instance, **kwargs):
+    def process_job_details(self, class_instance, target_method, job_links, **kwargs):
         """
-        Manages multi-threaded calls for each job_link scraping process
-        @param job_links: List of job_links to be scraped
-        @type job_links: list
-        @param target_method: The method for scraping the job link. Implemented within each scraper class
-        @type target_method: str
+        Manages a pool of multi-threaded calls to each job_link scraper function
         @param class_instance: The instance of the scraper class calling this method
         @type class_instance: class
+        @param target_method: The method for scraping the job link. Implemented within each scraper class
+        @type target_method: str
+        @param job_links: List of job_links to be scraped
+        @type job_links: list
         @param kwargs: Extra key-value pair args to be passed to the target method
         """
         if job_links:
-            with ThreadPoolExecutor(max_workers = 100) as executor:
+            with ThreadPoolExecutor(max_workers = 10) as executor:
                 try:
                     method_instance = getattr(class_instance, target_method)
                 except AttributeError as e:
                     lgr.error(f"Method {target_method} does not exist in {class_instance} scraper class")
                     print(e)
                 else:
+                    delay = kwargs.pop('delay', 0)
                     results = []
-                    futures = [executor.submit(method_instance, link, **kwargs) for link in job_links]
+                    futures = [executor.submit(method_instance, link, delay = random.randrange(delay, 10), **kwargs) for link in job_links]
                     for future in as_completed(futures):
-                        # time.sleep(self.config['delay'])
                         res = future.result()
                         results.append(res)
                     getattr(class_instance, 'scrape_data').extend(results) # Extend scrape_data instance for that scraper class

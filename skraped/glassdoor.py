@@ -49,7 +49,7 @@ class Glassdoor(ScraperBase):
                     'Failed to retrieve job links from Glassdoor search page results')
                 return []
             job_links = self.run_pre_scrape_filters(job_links, source="glassdoor")
-            super().process_job_details(job_links, "extract_job_details", self)
+            super().process_job_details(self, "extract_job_details", job_links, delay = self.sleep_seconds)
         return self.scrape_data
 
     def get_pages(self, page_limit=1):
@@ -100,14 +100,17 @@ class Glassdoor(ScraperBase):
                         job_links.add(self.base_url + link)
         return list(job_links)
 
-    def extract_job_details(self, job_url):
+    def extract_job_details(self, job_url, delay = 0, **kwargs):
         """
         Extracts job details from each job link
         @param job_url: A link/url to the job details page
         @type job_url: str
+        @param delay: A value in seconds to delay this scraper operation
+        @type delay: int
+        @param kwargs: Extra key-value pair arguments to be passed
         @return: The extracted job details
+        @rtype: dict
         """
-        delay = random.randrange(self.sleep_seconds, 10)
         time.sleep(delay)
         lgr.info(f"Delay: {delay}s. Processing {job_url}")
         res = self.send_request(job_url, 'get')
