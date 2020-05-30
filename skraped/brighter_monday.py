@@ -1,4 +1,6 @@
 import logging
+import time
+import random
 from bs4 import BeautifulSoup
 from .scraper_base import ScraperBase
 from skraped.utils import validate_and_parse_url
@@ -22,6 +24,7 @@ class BrighterMonday(ScraperBase):
         self.extra_headers = {}
         self.page_limit = 1
         self.scrape_data = []
+        self.sleep_seconds = self.config.get('delay')
 
     def scrape(self):
         """Entry point for the scraper"""
@@ -124,7 +127,9 @@ class BrighterMonday(ScraperBase):
         @type job_url: str
         @return: The extracted job details
         """
-        lgr.info(f"Processing {job_url}")
+        delay = random.randrange(self.sleep_seconds, 10)
+        time.sleep(delay)
+        lgr.info(f"Delay: {delay}s. Processing {job_url}")
         res = self.send_request(job_url, 'get', return_raw=True)
         if not res:
             lgr.error(f'Get job details for {job_url} failed')

@@ -183,8 +183,6 @@ class ScraperBase():
             proxies = {
                 'https': ''
             }
-            # sleep_seconds = random.randrange(2, 10)
-            # time.sleep(sleep_seconds)
             req = requests.get  # Defaults the HTTP method to get
             try:
                 req = getattr(requests, method.lower())
@@ -231,6 +229,7 @@ class ScraperBase():
                     results = []
                     futures = [executor.submit(method_instance, link, **kwargs) for link in job_links]
                     for future in as_completed(futures):
+                        # time.sleep(self.config['delay'])
                         res = future.result()
                         results.append(res)
                     getattr(class_instance, 'scrape_data').extend(results) # Extend scrape_data instance for that scraper class

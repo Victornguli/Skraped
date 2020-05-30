@@ -9,7 +9,8 @@ VALID_CONFIG = {
     'log_path': (str, ''),
     'sources': (list, ['Linkedin', 'BrighterMonday', 'Glassdoor']),
     'keywords': (str, ''),
-    'settings': (str, '')
+    'settings': (str, ''),
+    'delay': (int, 0)
 }
 
 
