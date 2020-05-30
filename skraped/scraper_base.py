@@ -219,7 +219,7 @@ class ScraperBase():
         @param kwargs: Extra key-value pair args to be passed to the target method
         """
         if job_links:
-            with ThreadPoolExecutor(max_workers = 10) as executor:
+            with ThreadPoolExecutor() as executor:
                 try:
                     method_instance = getattr(class_instance, target_method)
                 except AttributeError as e:
