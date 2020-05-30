@@ -6,14 +6,13 @@ import logging
 import random
 import time
 import threading
+from concurrent.futures import ThreadPoolExecutor, as_completed
 
 from bs4 import BeautifulSoup
 from fake_useragent import UserAgent
 from .utils import validate_and_parse_url, get_job_id
 
 lgr = logging.getLogger()
-
-# TODO: Add a base requests method/config to be used by each scraper class
 
 
 class ScraperBase():
@@ -221,10 +220,10 @@ class ScraperBase():
         @param class_instance: An instance of the scraper class calling this method
         @type class_instance: class
         @param kwargs: Extra key-value arguments to be passed to the target method
-        @return: Boolean
         """
         try:
             method_instance = getattr(class_instance, target_method)
+            lgr.info(f"Proccessing {job_link}")
         except AttributeError as e:
             lgr.error(f"Method {target_method} does not exist in {class_instance} scraper class")
             print(e)
@@ -232,18 +231,22 @@ class ScraperBase():
             if job_link:
                 details = method_instance(job_link, **kwargs)
                 getattr(class_instance, 'scrape_data').append(details)
-                lgr.info(f"Fetched {job_link} succesfully")
                 # return details
 
     def thread_executor(self, job_links, target_method, class_instance, **kwargs):
-        threads = []
-        for link in job_links:
-            thread = threading.Thread(target = self.process_job_details, args = [link, target_method, class_instance], kwargs = kwargs)
-            threads.append(thread)
-        
-        for thread in threads:
-            thread.start()
-        
-        for thread in threads:
-            thread.join()
+        """
+        Manages multi-threaded calls for each job_link scraping process
+        @param job_links: List of job_links to be scraped
+        @type job_links: list
+        @param target_method: The method for scraping the job link. Implemented within each scraper class
+        @type target_method: str
+        @param class_instance: The instance of the scraper class calling this method
+        @type class_instance: class
+        @param kwargs: Extra key-value pair args to be passed to the process_job_details method
+        """
+        with ThreadPoolExecutor(max_workers = 10) as executor:
+            futures = [executor.submit(self.process_job_details, link, target_method, class_instance, **kwargs) for link in job_links]
+
+            for future in as_completed(futures):
+                future.result()
         return
