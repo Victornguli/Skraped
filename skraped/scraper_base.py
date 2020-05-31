@@ -229,11 +229,8 @@ class ScraperBase():
                     lgr.error(f"Method {target_method} does not exist in {class_instance} scraper class")
                     print(e)
                 else:
-                    if self.delay:
-                        min_delay = self.min_delay
-                        max_delay = self.max_delay
                     results = []
-                    futures = [executor.submit(method_instance, link, delay = random.randrange(min_delay, max_delay), **kwargs) for link in job_links]
+                    futures = [executor.submit(method_instance, link, delay = random.randrange(self.min_delay, self.max_delay) if self.delay else 0, **kwargs) for link in job_links]
                     for future in as_completed(futures):
                         res = future.result()
                         results.append(res)
