@@ -28,7 +28,6 @@ def main():
     base = ScraperBase(config)
     scraper_classes = config.get('sources')
     scrape_data = []
-    # return config
     for scraper in scraper_classes:
         class_instance = get_class_instance(scraper, config=config)
         if class_instance is None:

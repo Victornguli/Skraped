@@ -21,6 +21,9 @@ class ScraperBase():
     def __init__(self, config={}):
         self.config = config
         self.output_path = self.config.get('output_path')
+        self.delay = self.config.get('delay', False)
+        self.min_delay  = self.config.get('delay_range', {}).get('min_delay', 0)
+        self.max_delay  = self.config.get('delay_range', {}).get('max_delay', 10)
 
     def scrape(self):
         """
@@ -226,9 +229,11 @@ class ScraperBase():
                     lgr.error(f"Method {target_method} does not exist in {class_instance} scraper class")
                     print(e)
                 else:
-                    delay = kwargs.pop('delay', 0)
+                    if self.delay:
+                        min_delay = self.min_delay
+                        max_delay = self.max_delay
                     results = []
-                    futures = [executor.submit(method_instance, link, delay = random.randrange(delay, 10), **kwargs) for link in job_links]
+                    futures = [executor.submit(method_instance, link, delay = random.randrange(min_delay, max_delay), **kwargs) for link in job_links]
                     for future in as_completed(futures):
                         res = future.result()
                         results.append(res)

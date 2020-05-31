@@ -7,8 +7,7 @@ from yaml import load, dump
 lgr = logging.getLogger()
 
 base_path = os.path.dirname(os.path.abspath(__file__))
-DEFAULT_SETTINGS_PATH = os.path.normpath(
-    os.path.join(base_path, 'settings.yaml'))
+DEFAULT_SETTINGS_PATH = os.path.normpath(os.path.join(base_path, 'settings.yaml'))
 
 
 def parse_cli_args():
