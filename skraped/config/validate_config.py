@@ -10,9 +10,11 @@ VALID_CONFIG = {
     'sources': (list, ['Linkedin', 'BrighterMonday', 'Glassdoor']),
     'keywords': (str, ''),
     'settings': (str, ''),
-    'delay': (int, 0)
+    'delay': (bool, False),
+    'delay_range': (dict, {'min_delay': (int, 0), 'max_delay': (int, 0)})
 }
 
+# @TODO: Add recurvise validation for nested configuration items
 
 class ConfigError(Exception):
     def __init__(self, *args):

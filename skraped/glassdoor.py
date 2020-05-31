@@ -49,7 +49,7 @@ class Glassdoor(ScraperBase):
                     'Failed to retrieve job links from Glassdoor search page results')
                 return []
             job_links = self.run_pre_scrape_filters(job_links, source="glassdoor")
-            super().process_job_details(self, "extract_job_details", job_links, delay = self.sleep_seconds)
+            super().process_job_details(self, "extract_job_details", job_links)
         return self.scrape_data
 
     def get_pages(self, page_limit=1):

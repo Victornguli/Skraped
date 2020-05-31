@@ -12,4 +12,8 @@ sources:
 # Search keywords to be submitted during the search
 keywords: "Software Developer"
 
-delay: 2
+delay: True
+
+delay_range:
+  min_delay: 2
+  max_delay: 10
