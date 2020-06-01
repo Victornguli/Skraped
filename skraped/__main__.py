@@ -3,6 +3,7 @@ import sys
 import logging
 import csv
 import time
+from datetime import datetime
 from skraped.config.parser import parse_config
 from skraped.config.validate_config import validate_conf
 from skraped.scraper_base import ScraperBase
@@ -14,7 +15,7 @@ t_start = time.perf_counter()
 
 lgr = logging.getLogger()
 lgr.setLevel('INFO')
-logging.basicConfig(filename='basic.log', level='INFO')
+logging.basicConfig(filename='logs.log', level='INFO')
 
 if lgr.level == 20:
     lgr.addHandler(logging.StreamHandler(sys.stdout))
@@ -23,6 +24,7 @@ else:
 
 
 def main():
+    lgr.info("Initialized Skraper on {}".format(datetime.now().strftime("%d/%m/%y %H:%M %p")))
     config = parse_config()
     validate_conf(config)
     base = ScraperBase(config)
