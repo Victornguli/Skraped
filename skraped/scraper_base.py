@@ -101,6 +101,7 @@ class ScraperBase():
                     pickle.dump(scrape_data, pickle_file)
                 lgr.info(
                     f"Dumped scraped pickle at {self.output_path} successfully")
+                return True
         except Exception as ex:
             lgr.error(
                 f"Failed to save pickle data at {self.output_path}")
