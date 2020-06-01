@@ -101,6 +101,7 @@ class ScraperBase():
                     pickle.dump(scrape_data, pickle_file)
                 lgr.info(
                     f"Dumped scraped pickle at {self.output_path} successfully")
+                return True
         except Exception as ex:
             lgr.error(
                 f"Failed to save pickle data at {self.output_path}")
@@ -163,7 +164,7 @@ class ScraperBase():
             ids = [job["job_id"] for job in self.load_csv() if job["source"] and job["source"].lower() == source]
             res = [job_ids[job_id] for job_id in job_ids if job_id not in ids and job_id is not None]
             dups = len(job_ids) - len(res) 
-            lgr.info("Found {} saved ids out of the {} scraped ids for source {} \n".format(dups, len(job_ids), source))
+            lgr.info("Found {} saved ids out of the {} scraped ids for source {}".format(dups, len(job_ids), source))
             return res
         except Exception as e:
             lgr.info("Failed to filter job_ids")
