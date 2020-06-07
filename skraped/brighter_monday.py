@@ -21,7 +21,6 @@ class BrighterMonday(ScraperBase):
             'q': self.config.get('keywords', '')
         }
         self.extra_headers = {}
-        self.page_limit = 1
         self.scrape_data = []
 
     def scrape(self):
@@ -33,7 +32,7 @@ class BrighterMonday(ScraperBase):
                 self.url += "&" + param + "=" + \
                     ("+").join(self.query_params[param].split(" "))
 
-        pages = self.get_pages(self.page_limit)
+        pages = self.get_pages()
         if not pages:
             lgr.error('Failed to retrieve any Brighter Monday results page')
             return None
@@ -48,13 +47,10 @@ class BrighterMonday(ScraperBase):
         return self.scrape_data
         # return res
 
-    def get_pages(self, page_limit=1):
+    def get_pages(self):
         """
         Retrieves each job results page upto the specified limit. 
-        Tries to fetch the first page then subsequent page calls are done if 
-        number of processed_pages remain to be lesser than the page_limit defined 
-        @param page_limit: The page limit to be applied when retrieving the pages
-        @type page_limit: int
+        Tries to fetch all pages from the paginated results 
         """
         processed_pages = 0
         pages = []
@@ -63,23 +59,18 @@ class BrighterMonday(ScraperBase):
             soup = BeautifulSoup(res, 'lxml')
             pages.append(soup)
             processed_pages += 1
-            lgr.info(
-                f'Fetched page {processed_pages} of Brighter Monday results')
+            # lgr.info(f'Fetched page {processed_pages} of Brighter Monday results')
         if processed_pages:
-            while processed_pages < page_limit:
-                res = self.send_request('{}&page={}'.format(
-                    self.url, processed_pages + 1), 'get')
-                if res is None:
-                    lgr.info(
-                        'Brighter Monday page retrieval Done. Retrieved {} out of {}(limit) pages'.format(processed_pages, page_limit))
-                    break
-                soup = BeautifulSoup(res, 'lxml')
+            next_page_request = self.send_request('{}&page={}'.format(self.url, processed_pages + 1), 'get')
+            while next_page_request is not None:
+                soup = BeautifulSoup(next_page_request, 'lxml')
                 pages.append(soup)
                 processed_pages += 1
-                lgr.info(
-                    f'Fetched page {processed_pages} of Brighter Monday results')
+                # lgr.info(f'Fetched page {processed_pages} of Brighter Monday results')
+                next_page_request = self.send_request('{}&page={}'.format(self.url, processed_pages + 1), 'get')
 
-        return pages
+            lgr.info('\nRetrieved {} Brighter Monday result page(s)'.format(processed_pages))
+        return set(pages)
 
     def get_job_links(self, pages_soup):
         """
@@ -105,8 +96,7 @@ class BrighterMonday(ScraperBase):
                         'Job links fetch for brighter monday page {} using parsed Html failed'.format(page_idx + 1))
                     continue  # Well nothing else can be done now..
                 try:
-                    links = [container.find('a')['href']
-                             for container in job_containers]
+                    links = [container.find('a')['href'] for container in job_containers]
                 except Exception:
                     lgr.error(
                         'Job links for Brighter Monday page {} could not be extracted..'.format(page_idx + 1))
