@@ -38,6 +38,7 @@ def get_job_id(url, source):
     """
     parsed_url = validate_and_parse_url(url)
     if parsed_url is None:
+        lgr.info(f'Failed to parse url {url}')
         return None
     if source.lower() == "glassdoor":
         job_url = parsed_url.get("query")

@@ -138,7 +138,7 @@ class ScraperBase():
         try:
             if scrape_data:
                 csv_data = self.load_csv()
-                dups = dict((i["job_id"], i) for i in csv_data) if csv_data else {}
+                dups = dict((i["job_id"], i) for i in csv_data if i) if csv_data else {}
                 for job in scrape_data:
                     dups[job["job_id"]] = job
                 scrape_data = [dups[key] for key in dups]
@@ -158,18 +158,25 @@ class ScraperBase():
         @type source: str
         @rtype list 
         """
-        res = []
-        job_ids = dict((get_job_id(job_link, source), job_link) for job_link in job_links)
+        filtered_links = []
+        scraped_ids = dict((get_job_id(job_link, source), job_link) for job_link in job_links)
+        lgr.info('Parsed {} job ids from {} links'.format(len(scraped_ids), len(job_links)))
         try:
-            ids = [job["job_id"] for job in self.load_csv() if job["source"] and job["source"].lower() == source]
-            res = [job_ids[job_id] for job_id in job_ids if job_id not in ids and job_id is not None]
-            dups = len(job_ids) - len(res) 
-            lgr.info("Found {} saved ids out of the {} scraped ids for source {}".format(dups, len(job_ids), source))
-            return res
+            # Get saved ids first(load from csv file, default to empty list if csv data DNE)
+            saved_ids = []
+            for job in self.load_csv():
+                if job["source"] and job["source"].lower() == source:
+                    saved_ids.append(job["job_id"])
+            # Filter scraped links against the saved_ids to avoid scraping existing jobs
+            filtered_links = [scraped_ids[job_id] for job_id in scraped_ids if job_id not in saved_ids and job_id is not None]
+            # dups = len(scraped_ids) - len(filtered_links)
+            # lgr.info("Found {} saved ids out of the {} scraped ids for source {}".format(dups, len(scraped_ids), source))
+            lgr.info('Scraping {} out of {} scraped links'.format(len(filtered_links), len(job_links)))
+            return filtered_links
         except Exception as e:
             lgr.info("Failed to filter job_ids")
             print(str(e))
-        return res
+        return filtered_links
 
     @staticmethod
     def send_request(url, method, return_raw=False):
@@ -196,7 +203,7 @@ class ScraperBase():
             resp = req(url, proxies=proxies, headers=headers, timeout=10)
             if resp.status_code != 200:
                 lgr.error(
-                    f'Request to {url} return status code {resp.status_code}')
+                    f'{method} request to {url} returned status code {resp.status_code}')
             else:
                 return resp if return_raw else resp.text
         except requests.ConnectionError as e:
@@ -231,7 +238,8 @@ class ScraperBase():
                     print(e)
                 else:
                     results = []
-                    futures = [executor.submit(method_instance, link, delay = random.randrange(self.min_delay, self.max_delay) if self.delay else 0, **kwargs) for link in job_links]
+                    futures = [executor.submit(
+                        method_instance, link, delay = random.randrange(self.min_delay, self.max_delay) if self.delay else 0, **kwargs) for link in job_links]
                     for future in as_completed(futures):
                         res = future.result()
                         results.append(res)

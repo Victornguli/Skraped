@@ -28,7 +28,6 @@ class Glassdoor(ScraperBase):
             'clickSource': 'searchBtn',
             'suggestCount': '0',
         }
-        self.page_limit = 1  # Hardcoded for now.. fix with dynamic conf
         self.scrape_data = []
         self.sleep_seconds = self.config["delay"]
 
@@ -41,7 +40,7 @@ class Glassdoor(ScraperBase):
             '+'.join(first_query[1].split(" "))
         for key, value in self.query_params.items():
             self.url += '&' + str(key)+'='+'+'.join(value.split(" "))
-        pages = self.get_pages(page_limit=self.page_limit)
+        pages = self.get_pages()
         if pages:
             job_links = self.get_job_links(pages)
             if not job_links:
@@ -52,33 +51,32 @@ class Glassdoor(ScraperBase):
             super().process_job_details(self, "extract_job_details", job_links)
         return self.scrape_data
 
-    def get_pages(self, page_limit=1):
+    def get_pages(self):
         """
-        Retrieves each job results page upto the specified limit.
-        @param page_limit: The page limit to be applied when retrieving the pages
-        @type page_limit: int
+        Retrieves each job results page upto the pagination limit.
         """
         pages, page_count = [], 0
         next_page_url = self.url
-        for _ in range(page_limit):
-            res = self.send_request(next_page_url, 'get')
-            if res is not None:
-                page_soup = BeautifulSoup(res, 'lxml')
-                pages.append(page_soup)
-                page_count += 1
-                lgr.info(f'Fetched page {page_count} of Glassdoor results')
-                footer = page_soup.find(
-                    'div', {'id': 'FooterPageNav', 'class': 'pageNavBar'})
-                if footer:
-                    next_page = footer.find('li', {'class': 'next'})
-                    if not next_page:
-                        break
-                    next_page_url = next_page.find('a')['href']
-                    if not next_page_url:
-                        break
-                    next_page_url = self.base_url + next_page_url
-                else:
+        next_res = self.send_request(next_page_url, 'get')
+        while next_res is not None:
+            page_soup = BeautifulSoup(next_res, 'lxml')
+            pages.append(page_soup)
+            page_count += 1
+            # lgr.info(f'Fetched page {page_count} of Glassdoor results')
+            footer = page_soup.find(
+                'div', {'id': 'FooterPageNav', 'class': 'pageNavBar'})
+            if footer:
+                next_page = footer.find('li', {'class': 'next'})
+                if not next_page:
                     break
+                next_page_url = next_page.find('a')['href']
+                if not next_page_url:
+                    break
+                next_page_url = self.base_url + next_page_url
+                next_res = self.send_request(next_page_url, 'get')
+            else:
+                break
+        lgr.info(f'\nRetrieved {page_count} Glassdoor result page(s)')
         return pages
 
     def get_job_links(self, pages_soup):
@@ -119,8 +117,7 @@ class Glassdoor(ScraperBase):
             return None
         soup = BeautifulSoup(res, 'lxml')
         if not soup:
-            lgr.error(
-                f'Failed to parse the response HTML for this post {job_url}')
+            lgr.error(f'Failed to parse the response HTML for this post {job_url}')
             return None
         job_details = {
             'title': '',
