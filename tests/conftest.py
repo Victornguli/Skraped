@@ -61,17 +61,16 @@ def saved_csv(valid_config, scrape_data):
 def get_scraped_pages(valid_config, scraper_class):
     class_instance = scraper_class(valid_config)
     class_instance.build_url()
-    pages = class_instance.get_pages()
-    return class_instance, pages
+    class_instance.get_pages()
+    return class_instance
 
 
-# @TODO: Fix current issue with BrighterMonday redirect and refactor the tests
 @pytest.fixture
 @pytest.mark.parametrize("scraper_class", [Glassdoor, BrighterMonday])
 def get_scraped_job_details(get_scraped_pages):
-    scraper_instance, pages = get_scraped_pages[0], get_scraped_pages[1]
-    assert pages != [], "Should fetch serch result pages"
-    links = scraper_instance.get_job_links(pages)
+    scraper_instance = get_scraped_pages
+    assert scraper_instance.pages != [], "Should fetch search result pages"
+    links = scraper_instance.get_job_links(scraper_instance.pages)
     link = links[0] if links else None
     assert link is not None, "Should retrieve the job_link"
     details = scraper_instance.extract_job_details(link)
