@@ -22,24 +22,25 @@ class BrighterMonday(ScraperBase):
         }
         self.extra_headers = {}
         self.scrape_data = []
+        self.pages = []
+        self.name = "BrighterMonday"
 
     def scrape(self):  # pragma: nocover
         """Entry point for the scraper"""
         self.build_url()
-        pages = self.get_pages()
-        if not pages:
+        self.get_pages()
+        if not self.pages:
             lgr.error('Failed to retrieve any Brighter Monday results page')
             return []
 
-        job_links = self.get_job_links(pages)
+        job_links = self.get_job_links(self.pages)
         if not job_links:
             lgr.error(
                 'Failed to retrieve any jobs link for Brighter Monday page results')
         job_links = self.run_pre_scrape_filters(
-            job_links, source="brightermonday")
+            job_links, source=self.name)
         super().process_job_details(self, "extract_job_details", job_links)
         return self.scrape_data
-        # return res
 
     def build_url(self):
         """Builds the full url with request params"""
@@ -81,7 +82,7 @@ class BrighterMonday(ScraperBase):
 
             lgr.info('\nRetrieved {} Brighter Monday result page(s)'.format(
                 processed_pages))
-        return set(pages)
+        self.pages = pages
 
     def get_job_links(self, pages_soup):
         """
@@ -147,25 +148,17 @@ class BrighterMonday(ScraperBase):
             'company': '',
             'job_link': job_url,
             'application_link': job_url,
-            # 'description': '',
             'job_id': '',
-            'source': 'BrighterMonday'
+            'source': self.name
         }
         title = soup.find('h1', {'class': 'job-header__title'})
         company = soup.find(
             'div', {'class': ['if-wrapper-column', 'job-header__details']}).find('h2').find('a')
-        top_details = soup.find(
-            'div', {'class': 'customer-card__content-segment'})
-        description = soup.find(
-            'div', {'class': 'description-content__content'})
         url_path = validate_and_parse_url(job_url)['path']
         job_id = url_path.split("-")[-1] if url_path else None
 
         job_details['title'] = title.text.strip() if title else ''
         job_details['company'] = company.text.strip() if company else ''
-        # job_details['description'] = top_details.text.strip(
-        # ) if top_details else ''
-        # job_details['description'] += description.text.strip() if description else ''
         job_details['job_id'] = job_id
 
         return job_details

@@ -40,10 +40,10 @@ class ScraperBase():
         """
         try:
             if scrape_data:
-                with open(os.path.join(self.output_path, "data.csv"), newline="") as f:
+                with open(os.path.join(self.output_path, "data.csv"), "w", newline="") as f:
                     fieldnames = ["TITLE", "COMPANY", "JOB LINK",
                                 "APPLICATION LINK", "JOB ID", "SOURCE"]
-                    writer = csv.DictWriter(f, fieldnames=fieldnames)
+                    writer = csv.DictWriter(f, fieldnames=fieldnames, quoting = csv.QUOTE_MINIMAL)
                     writer.writeheader()
                     for row in scrape_data:
                         data = {
@@ -139,7 +139,6 @@ class ScraperBase():
             if scrape_data:
                 csv_data = self.load_csv()
                 dups = dict((i["job_id"], i) for i in csv_data if i) if csv_data else {}
-                lgr.info("OK ")
                 for job in scrape_data:
                     dups[job["job_id"]] = job
                 scrape_data = [dups[key] for key in dups]
@@ -166,7 +165,7 @@ class ScraperBase():
             # Get saved ids first(load from csv file, default to empty list if csv data DNE)
             saved_ids = []
             for job in self.load_csv():
-                if job["source"] and job["source"].lower() == source:
+                if job["source"] and job["source"].lower() == source.lower():
                     saved_ids.append(job["job_id"])
             # Filter scraped links against the saved_ids to avoid scraping existing jobs
             filtered_links = [scraped_ids[job_id] for job_id in scraped_ids if job_id not in saved_ids and job_id is not None]

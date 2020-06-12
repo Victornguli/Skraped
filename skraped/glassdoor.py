@@ -29,21 +29,23 @@ class Glassdoor(ScraperBase):
             'suggestCount': '0',
         }
         self.scrape_data = []
+        self.pages = []
         self.sleep_seconds = self.config["delay"]
+        self.name = "Glassdoor"
 
     def scrape(self):  # pragma: nocover
         """
         Entry point for Glassdoor scraper
         """
         self.build_url()
-        pages = self.get_pages()
-        if pages:
-            job_links = self.get_job_links(pages)
+        self.get_pages()
+        if self.pages:
+            job_links = self.get_job_links(self.pages)
             if not job_links:
                 lgr.error(
                     'Failed to retrieve job links from Glassdoor search page results')
                 return []
-            job_links = self.run_pre_scrape_filters(job_links, source="glassdoor")
+            job_links = self.run_pre_scrape_filters(job_links, source=self.name)
             super().process_job_details(self, "extract_job_details", job_links)
         return self.scrape_data
     
@@ -82,7 +84,7 @@ class Glassdoor(ScraperBase):
             else:
                 break
         lgr.info(f'\nRetrieved {page_count} Glassdoor result page(s)')
-        return pages
+        self.pages = pages
 
     def get_job_links(self, pages_soup):
         """
@@ -129,9 +131,8 @@ class Glassdoor(ScraperBase):
             'company': '',
             'job_link': job_url,
             'application_link': '',
-            # 'description': '',
             'job_id': '',
-            'source': 'Glassdoor'
+            'source': self.name
         }
         title = soup.find('div', {'class': 'e11nt52q5'})
         company_container = [child for child in soup.find(
@@ -145,7 +146,6 @@ class Glassdoor(ScraperBase):
             # Try checking for a button instead. Glassdoor uses both btns and anchor tags
             apply_btn = soup.find(
                 'button', {'class': ['gd-ui-button', 'applyButton', 'e1ulk49s0', 'css-1m0gkmt']})
-        description = soup.find('div', {'class': 'desc'})
 
         job_details['title'] = title.text.encode(
             'ascii', 'ignore').decode('utf-8') if title else ''
@@ -163,8 +163,6 @@ class Glassdoor(ScraperBase):
             application_link = link_redirect.url
         job_details['application_link'] = (application_link).encode(
             'ascii', 'ignore').decode('utf-8')
-        # job_details['description'] = description.text.encode(
-        #     'ascii', 'ignore').decode('utf-8').strip() if description else ''
         job_details['job_id'] = apply_btn['data-job-id'] if apply_btn else ''
 
         return job_details
