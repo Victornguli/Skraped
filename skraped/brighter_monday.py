@@ -23,7 +23,7 @@ class BrighterMonday(ScraperBase):
         self.extra_headers = {}
         self.scrape_data = []
 
-    def scrape(self):
+    def scrape(self):  # pragma: nocover
         """Entry point for the scraper"""
         self.build_url()
         pages = self.get_pages()
@@ -60,9 +60,8 @@ class BrighterMonday(ScraperBase):
         processed_pages = 0
         pages = []
         res = self.send_request(self.url, 'get', return_raw=True)
-        if res.url != self.url:
-            # Temporary fix on some url redirect issues causing a redirect to main page
-            return []
+        if res.url != self.url:  # pragma: nocover
+            return []  # Temporary fix on some url redirect issues causing a redirect to main page
         res = res.text
         if res is not None:
             soup = BeautifulSoup(res, 'lxml')
@@ -98,7 +97,7 @@ class BrighterMonday(ScraperBase):
             # Search for prerender links tags first..
             link_tags = page.find_all('link', {'rel': 'prerender'})
             links = [tag['href'] for tag in link_tags if hasattr(tag, 'href')]
-            if not links:
+            if not links:  # pragma: nocover
                 lgr.info(
                     'Job link fetch using prerender links for Brighter Monday page {} failed.. Switching to parsed html'.format(page_idx + 1))
                 job_containers = page.find_all(
@@ -135,11 +134,11 @@ class BrighterMonday(ScraperBase):
         time.sleep(delay)
         lgr.info(f"Delay: {delay}s. Processing {job_url}")
         res = self.send_request(job_url, 'get', return_raw=True)
-        if not res:
+        if not res:  # pragma: nocover
             lgr.error(f'Get job details for {job_url} failed')
             return None
         soup = BeautifulSoup(res.text, 'lxml')
-        if not soup:
+        if not soup:  # pragma: nocover
             lgr.error(
                 'BeautifulSoup raw html parse using lxml for {job_url} failed')
             return None

@@ -25,7 +25,7 @@ class ScraperBase():
         self.min_delay  = self.config.get('delay_range', {}).get('min_delay', 0)
         self.max_delay  = self.config.get('delay_range', {}).get('max_delay', 10)
 
-    def scrape(self):
+    def scrape(self):  # pragma: nocover
         """
         Entry Point to the execution of all scrape scources defined in the config
         """
@@ -54,11 +54,11 @@ class ScraperBase():
                         writer.writerow(data)
                 lgr.info(f"Saved results to {self.output_path} successfully.")
                 return True
-        except Exception as e:
+        except Exception as e:  # pragma: nocover
             lgr.error(
                 f'\nFailed to save search results in csv file. Output path {self.output_path}')
             print(str(e))
-        return False
+        return False  # pragma: nocover
 
     def load_csv(self):
         """
@@ -83,7 +83,7 @@ class ScraperBase():
                         "job_id": row["JOB ID"], "source": row["SOURCE"]})
                     line_count += 1
             return saved_data
-        except FileNotFoundError:
+        except FileNotFoundError:  # pragma: nocover
             lgr.info(f"No existing csv file found {self.output_path}")
         return saved_data
 
@@ -102,7 +102,7 @@ class ScraperBase():
                 lgr.info(
                     f"Dumped scraped pickle at {self.output_path} successfully")
                 return True
-        except Exception as ex:
+        except Exception as ex:  # pragma: nocover
             lgr.error(
                 f"Failed to save pickle data at {self.output_path}")
             print(str(ex))
@@ -121,7 +121,7 @@ class ScraperBase():
             lgr.info(
                 f"Loaded scrape_data from pickle at {self.output_path} successfully")
             return scrape_data
-        except Exception as ex:
+        except Exception as ex:  # pragma: nocover
             lgr.error(
                 f"Failed to load scrape_data from pickle data at {self.output_path}")
             print(str(ex))
@@ -143,10 +143,10 @@ class ScraperBase():
                     dups[job["job_id"]] = job
                 scrape_data = [dups[key] for key in dups]
                 return scrape_data
-        except Exception as ex:
+        except Exception as ex:  # pragma: nocover
             lgr.error("Failed to merge scraped data")
             print(str(ex))
-        return scrape_data
+        return scrape_data  # pragma: nocover
 
     def run_pre_scrape_filters(self, job_links, source):
         """
@@ -171,7 +171,7 @@ class ScraperBase():
             filtered_links = [scraped_ids[job_id] for job_id in scraped_ids if job_id not in saved_ids and job_id is not None]
             lgr.info('Scraping {} new links from {} scraped links'.format(len(filtered_links), len(job_links)))
             return filtered_links
-        except Exception as e:
+        except Exception as e:   # pragma: nocover
             lgr.info("Failed to filter job_ids")
             print(str(e))
         return filtered_links
@@ -195,23 +195,23 @@ class ScraperBase():
             req = requests.get  # Defaults the HTTP method to get
             try:
                 req = getattr(requests, method.lower())
-            except AttributeError:
+            except AttributeError:  # pragma: nocover
                 lgr.warning(
                     f'{method} is an invalid HTTP method. Defaulting to GET')
             resp = req(url, proxies=proxies, headers=headers, timeout=10)
             if resp.status_code != 200:
-                lgr.error(
+                lgr.info(
                     f'{method} request to {url} returned status code {resp.status_code}')
             else:
                 return resp if return_raw else resp.text
-        except requests.ConnectionError as e:
+        except requests.ConnectionError as e:  # pragma: nocover
             lgr.error(
                 'Connection Error. Make sure that you are connected to the internet and try again')
             print(str(e))
-        except requests.Timeout as e:
+        except requests.Timeout as e:  # pragma: nocover
             lgr.error(
                 'Request timed out. Adjust your timeout value or try again later if this issue persists')
-        except requests.RequestException as e:
+        except requests.RequestException as e:  # pragma: nocover
             lgr.error(f'{method} request to {url} failed.')
             print(str(e))
         return None
@@ -231,7 +231,7 @@ class ScraperBase():
             with ThreadPoolExecutor() as executor:
                 try:
                     method_instance = getattr(class_instance, target_method)
-                except AttributeError as e:
+                except AttributeError as e:  # pragma: nocover
                     lgr.error(f"Method {target_method} does not exist in {class_instance} scraper class")
                     print(e)
                 else:

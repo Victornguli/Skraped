@@ -31,7 +31,7 @@ class Glassdoor(ScraperBase):
         self.scrape_data = []
         self.sleep_seconds = self.config["delay"]
 
-    def scrape(self):
+    def scrape(self):  # pragma: nocover
         """
         Entry point for Glassdoor scraper
         """
@@ -117,11 +117,11 @@ class Glassdoor(ScraperBase):
         time.sleep(delay)
         lgr.info(f"Delay: {delay}s. Processing {job_url}")
         res = self.send_request(job_url, 'get')
-        if not res:
+        if not res:  # pragma: nocover
             lgr.error(f'{job_url} details request returned None')
             return None
         soup = BeautifulSoup(res, 'lxml')
-        if not soup:
+        if not soup:  # pragma: nocover
             lgr.error(f'Failed to parse the response HTML for this post {job_url}')
             return None
         job_details = {
@@ -141,7 +141,8 @@ class Glassdoor(ScraperBase):
             company_name = company_container[0]
         apply_btn = soup.find(
             'a', {'class': ['gd-ui-button', 'applyButton', 'e1ulk49s0', 'css-1m0gkmt']})
-        if not apply_btn:  # Try checking for a button instead. Glassdoor uses both btns and anchor tags
+        if not apply_btn:  # pragma: nocover
+            # Try checking for a button instead. Glassdoor uses both btns and anchor tags
             apply_btn = soup.find(
                 'button', {'class': ['gd-ui-button', 'applyButton', 'e1ulk49s0', 'css-1m0gkmt']})
         description = soup.find('div', {'class': 'desc'})
@@ -152,9 +153,9 @@ class Glassdoor(ScraperBase):
             'ascii', 'ignore').decode('utf-8') if company_name else ''
         if hasattr(apply_btn, 'href') and apply_btn.name != 'button':
             application_link = self.base_url + apply_btn['href']
-        elif hasattr(apply_btn, 'data-job-url'):
+        elif hasattr(apply_btn, 'data-job-url'):  # pragma: nocover
             application_link = self.base_url + apply_btn['data-job-url']
-        else:
+        else:  # pragma: nocover
             application_link = ''
         link_redirect = self.send_request(
             application_link, 'get', return_raw=True)

@@ -29,4 +29,6 @@ class TestUtils(TestCase):
 
     def test_get_job_id_fail(self):
         glassdoor_id = get_job_id(self.glass_job_url, source = "glassddoor")
+        get_id_fail = get_job_id("thisisnotaurl", source = "somesauce")
         assert glassdoor_id is None, "Should fail because of invalid source identifier"
+        assert get_id_fail is None, "Should fail because an ivalid url was passed"

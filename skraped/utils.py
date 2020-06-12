@@ -48,11 +48,11 @@ def get_job_id(url, source):
                 parsed_params = dict(x.split("=") for x in job_url.split('&'))
                 if parsed_params:
                     return parsed_params.get("jobListingId", None)
-            except IndexError:
+            except IndexError:  # pragma: nocover
                 pass
     elif source.lower() == "brightermonday":
         try:
             return parsed_url.get("path").split("-")[-1]
-        except IndexError:
+        except IndexError:  # pragma: nocover
             pass
     return None

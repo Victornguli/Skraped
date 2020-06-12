@@ -3,6 +3,7 @@ include = /skraped/*
 omit =
     *__init__.py,
     *tests.py,
+    *setup.py,
     */home/travis/virtualenv/python3.6.7/*
     */env/*
     */venv/*

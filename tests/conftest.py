@@ -67,15 +67,12 @@ def get_scraped_pages(valid_config, scraper_class):
 
 # @TODO: Fix current issue with BrighterMonday redirect and refactor the tests
 @pytest.fixture
-@pytest.mark.parametrize("scraper_class", [Glassdoor])
+@pytest.mark.parametrize("scraper_class", [Glassdoor, BrighterMonday])
 def get_scraped_job_details(get_scraped_pages):
     scraper_instance, pages = get_scraped_pages[0], get_scraped_pages[1]
-    details = {"title": "Python Engineer"}
-    if scraper_instance.__class__.__name__ != "BrghterMonday":
-        assert pages != [], "Should fetch serch result pages"
-        links = scraper_instance.get_job_links(pages)
-        link = links[0] if links else None
-        assert link is not None, "Should retrieve the job_link"
-        details = scraper_instance.extract_job_details(link)
-        # assert details is not None
+    assert pages != [], "Should fetch serch result pages"
+    links = scraper_instance.get_job_links(pages)
+    link = links[0] if links else None
+    assert link is not None, "Should retrieve the job_link"
+    details = scraper_instance.extract_job_details(link)
     return details
