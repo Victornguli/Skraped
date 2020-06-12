@@ -169,9 +169,7 @@ class ScraperBase():
                     saved_ids.append(job["job_id"])
             # Filter scraped links against the saved_ids to avoid scraping existing jobs
             filtered_links = [scraped_ids[job_id] for job_id in scraped_ids if job_id not in saved_ids and job_id is not None]
-            # dups = len(scraped_ids) - len(filtered_links)
-            # lgr.info("Found {} saved ids out of the {} scraped ids for source {}".format(dups, len(scraped_ids), source))
-            lgr.info('Scraping {} out of {} scraped links'.format(len(filtered_links), len(job_links)))
+            lgr.info('Scraping {} new links from {} scraped links'.format(len(filtered_links), len(job_links)))
             return filtered_links
         except Exception as e:
             lgr.info("Failed to filter job_ids")

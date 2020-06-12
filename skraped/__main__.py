@@ -24,7 +24,7 @@ else:
 
 
 def main():
-    lgr.info("Initialized Skraper on {}".format(datetime.now().strftime("%d/%m/%y %H:%M %p")))
+    lgr.info("Initialized Skraper at {}".format(datetime.now().strftime("%d/%m/%y %H:%M %p")))
     config = parse_config()
     validate_conf(config)
     base = ScraperBase(config)
