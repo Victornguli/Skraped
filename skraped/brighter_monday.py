@@ -15,7 +15,7 @@ class BrighterMonday(ScraperBase):
         self.base_url = 'https://www.brightermonday.co.ke'
         # self.url = 'https://www.brightermonday.co.ke/jobs'
         # Provides more accurate results for IT Jobs
-        self.url = 'https://www.brightermonday.co.ke/jobs/it-software'
+        self.url = 'https://www.brightermonday.co.ke/jobs/software-data'
         self.query_params = {
             'page': 1,
             'q': self.config.get('keywords', '')
@@ -29,7 +29,7 @@ class BrighterMonday(ScraperBase):
         pages = self.get_pages()
         if not pages:
             lgr.error('Failed to retrieve any Brighter Monday results page')
-            return None
+            return []
 
         job_links = self.get_job_links(pages)
         if not job_links:
@@ -44,7 +44,8 @@ class BrighterMonday(ScraperBase):
     def build_url(self):
         """Builds the full url with request params"""
         main_query = self.query_params.popitem()
-        self.url += '?' + main_query[0] + '=' + ("+").join(main_query[1].split(" "))
+        self.url += '?' + main_query[0] + '=' + \
+            ("+").join(main_query[1].split(" "))
         for param in self.query_params:
             if param != 'page':
                 self.url += "&" + param + "=" + \
@@ -58,22 +59,29 @@ class BrighterMonday(ScraperBase):
         """
         processed_pages = 0
         pages = []
-        res = self.send_request(self.url, 'get')
+        res = self.send_request(self.url, 'get', return_raw=True)
+        if res.url != self.url:
+            # Temporary fix on some url redirect issues causing a redirect to main page
+            return []
+        res = res.text
         if res is not None:
             soup = BeautifulSoup(res, 'lxml')
             pages.append(soup)
             processed_pages += 1
             # lgr.info(f'Fetched page {processed_pages} of Brighter Monday results')
         if processed_pages:
-            next_page_request = self.send_request('{}&page={}'.format(self.url, processed_pages + 1), 'get')
+            next_page_request = self.send_request(
+                '{}&page={}'.format(self.url, processed_pages + 1), 'get')
             while next_page_request is not None:
                 soup = BeautifulSoup(next_page_request, 'lxml')
                 pages.append(soup)
                 processed_pages += 1
                 # lgr.info(f'Fetched page {processed_pages} of Brighter Monday results')
-                next_page_request = self.send_request('{}&page={}'.format(self.url, processed_pages + 1), 'get')
+                next_page_request = self.send_request(
+                    '{}&page={}'.format(self.url, processed_pages + 1), 'get')
 
-            lgr.info('\nRetrieved {} Brighter Monday result page(s)'.format(processed_pages))
+            lgr.info('\nRetrieved {} Brighter Monday result page(s)'.format(
+                processed_pages))
         return set(pages)
 
     def get_job_links(self, pages_soup):
@@ -100,7 +108,8 @@ class BrighterMonday(ScraperBase):
                         'Job links fetch for brighter monday page {} using parsed Html failed'.format(page_idx + 1))
                     continue  # Well nothing else can be done now..
                 try:
-                    links = [container.find('a')['href'] for container in job_containers]
+                    links = [container.find('a')['href']
+                             for container in job_containers]
                 except Exception:
                     lgr.error(
                         'Job links for Brighter Monday page {} could not be extracted..'.format(page_idx + 1))
@@ -112,7 +121,7 @@ class BrighterMonday(ScraperBase):
             job_links.extend(links)
         return job_links
 
-    def extract_job_details(self, job_url, delay = 0, **kwargs):
+    def extract_job_details(self, job_url, delay=0, **kwargs):
         """
         Extracts job details from each job link
         @param job_url: A link/url to the job details page
@@ -155,8 +164,9 @@ class BrighterMonday(ScraperBase):
 
         job_details['title'] = title.text.strip() if title else ''
         job_details['company'] = company.text.strip() if company else ''
-        job_details['description'] = top_details.text.strip() if top_details else ''
+        job_details['description'] = top_details.text.strip(
+        ) if top_details else ''
         job_details['description'] += description.text.strip() if description else ''
         job_details['job_id'] = job_id
-        
+
         return job_details
