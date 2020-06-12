@@ -29,4 +29,4 @@ cd skraped
 python install setup.py
 ```
 
-### Using Skraper
+### Using Skraped
