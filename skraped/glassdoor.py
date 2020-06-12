@@ -129,7 +129,7 @@ class Glassdoor(ScraperBase):
             'company': '',
             'job_link': job_url,
             'application_link': '',
-            'description': '',
+            # 'description': '',
             'job_id': '',
             'source': 'Glassdoor'
         }
@@ -163,8 +163,8 @@ class Glassdoor(ScraperBase):
             application_link = link_redirect.url
         job_details['application_link'] = (application_link).encode(
             'ascii', 'ignore').decode('utf-8')
-        job_details['description'] = description.text.encode(
-            'ascii', 'ignore').decode('utf-8').strip() if description else ''
+        # job_details['description'] = description.text.encode(
+        #     'ascii', 'ignore').decode('utf-8').strip() if description else ''
         job_details['job_id'] = apply_btn['data-job-id'] if apply_btn else ''
 
         return job_details

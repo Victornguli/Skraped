@@ -147,7 +147,7 @@ class BrighterMonday(ScraperBase):
             'company': '',
             'job_link': job_url,
             'application_link': job_url,
-            'description': '',
+            # 'description': '',
             'job_id': '',
             'source': 'BrighterMonday'
         }
@@ -163,9 +163,9 @@ class BrighterMonday(ScraperBase):
 
         job_details['title'] = title.text.strip() if title else ''
         job_details['company'] = company.text.strip() if company else ''
-        job_details['description'] = top_details.text.strip(
-        ) if top_details else ''
-        job_details['description'] += description.text.strip() if description else ''
+        # job_details['description'] = top_details.text.strip(
+        # ) if top_details else ''
+        # job_details['description'] += description.text.strip() if description else ''
         job_details['job_id'] = job_id
 
         return job_details

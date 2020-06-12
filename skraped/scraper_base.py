@@ -40,18 +40,19 @@ class ScraperBase():
         """
         try:
             if scrape_data:
-                with open(os.path.join(self.output_path, "data.csv"), "w", encoding='utf-8') as f:
+                with open(os.path.join(self.output_path, "data.csv"), newline="") as f:
                     fieldnames = ["TITLE", "COMPANY", "JOB LINK",
-                                "APPLICATION LINK", "DESCRIPTION", "JOB ID", "SOURCE"]
+                                "APPLICATION LINK", "JOB ID", "SOURCE"]
                     writer = csv.DictWriter(f, fieldnames=fieldnames)
                     writer.writeheader()
                     for row in scrape_data:
                         data = {
                             "TITLE": row["title"], "COMPANY": row["company"], "JOB LINK": row["job_link"],
-                            "APPLICATION LINK": row["application_link"], "DESCRIPTION": row["description"],
+                            "APPLICATION LINK": row["application_link"],
                             "JOB ID": row["job_id"], "SOURCE": row["source"]
                         }
                         writer.writerow(data)
+
                 lgr.info(f"Saved results to {self.output_path} successfully.")
                 return True
         except Exception as e:  # pragma: nocover
@@ -68,9 +69,9 @@ class ScraperBase():
         """
         saved_data = []
         try:
-            with open(os.path.join(self.output_path, "data.csv"), "r", encoding="utf-8") as saved_csv:
+            with open(os.path.join(self.output_path, "data.csv"), newline="") as saved_csv:
                 fieldnames = [
-                    "TITLE", "COMPANY", "JOB LINK", "APPLICATION LINK", "DESCRIPTION", "JOB ID", "SOURCE"]
+                    "TITLE", "COMPANY", "JOB LINK", "APPLICATION LINK", "JOB ID", "SOURCE"]
                 csv_reader = csv.DictReader(saved_csv, fieldnames=fieldnames)
                 line_count = 0
                 for row in csv_reader:
@@ -79,8 +80,7 @@ class ScraperBase():
                         continue
                     saved_data.append({
                         "title": row["TITLE"], "company": row["COMPANY"], "job_link": row["JOB LINK"],
-                        "application_link": row["APPLICATION LINK"], "description": row["DESCRIPTION"],
-                        "job_id": row["JOB ID"], "source": row["SOURCE"]})
+                        "application_link": row["APPLICATION LINK"], "job_id": row["JOB ID"], "source": row["SOURCE"]})
                     line_count += 1
             return saved_data
         except FileNotFoundError:  # pragma: nocover
@@ -139,6 +139,7 @@ class ScraperBase():
             if scrape_data:
                 csv_data = self.load_csv()
                 dups = dict((i["job_id"], i) for i in csv_data if i) if csv_data else {}
+                lgr.info("OK ")
                 for job in scrape_data:
                     dups[job["job_id"]] = job
                 scrape_data = [dups[key] for key in dups]
