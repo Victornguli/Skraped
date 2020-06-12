@@ -13,7 +13,7 @@ class BrighterMonday(ScraperBase):
     def __init__(self, config={}):
         super().__init__(config)
         self.base_url = 'https://www.brightermonday.co.ke'
-        self.alturl = 'https://www.brightermonday.co.ke/jobs'
+        # self.url = 'https://www.brightermonday.co.ke/jobs'
         # Provides more accurate results for IT Jobs
         self.url = 'https://www.brightermonday.co.ke/jobs/it-software'
         self.query_params = {
@@ -25,13 +25,7 @@ class BrighterMonday(ScraperBase):
 
     def scrape(self):
         """Entry point for the scraper"""
-        main_query = self.query_params.popitem()
-        self.url += '?' + main_query[0] + '=' + ("+").join(main_query[1].split(" "))
-        for param in self.query_params:
-            if param != 'page':
-                self.url += "&" + param + "=" + \
-                    ("+").join(self.query_params[param].split(" "))
-
+        self.build_url()
         pages = self.get_pages()
         if not pages:
             lgr.error('Failed to retrieve any Brighter Monday results page')
@@ -46,6 +40,16 @@ class BrighterMonday(ScraperBase):
         super().process_job_details(self, "extract_job_details", job_links)
         return self.scrape_data
         # return res
+
+    def build_url(self):
+        """Builds the full url with request params"""
+        main_query = self.query_params.popitem()
+        self.url += '?' + main_query[0] + '=' + ("+").join(main_query[1].split(" "))
+        for param in self.query_params:
+            if param != 'page':
+                self.url += "&" + param + "=" + \
+                    ("+").join(self.query_params[param].split(" "))
+        return self.url
 
     def get_pages(self):
         """

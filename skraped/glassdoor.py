@@ -35,11 +35,7 @@ class Glassdoor(ScraperBase):
         """
         Entry point for Glassdoor scraper
         """
-        first_query = self.query_params.popitem()
-        self.url += str(first_query[0])+'=' + \
-            '+'.join(first_query[1].split(" "))
-        for key, value in self.query_params.items():
-            self.url += '&' + str(key)+'='+'+'.join(value.split(" "))
+        self.build_url()
         pages = self.get_pages()
         if pages:
             job_links = self.get_job_links(pages)
@@ -50,6 +46,15 @@ class Glassdoor(ScraperBase):
             job_links = self.run_pre_scrape_filters(job_links, source="glassdoor")
             super().process_job_details(self, "extract_job_details", job_links)
         return self.scrape_data
+    
+    def build_url(self):
+        """Builds full url from query parameters specified"""
+        first_query = self.query_params.popitem()
+        self.url += str(first_query[0])+'=' + \
+            '+'.join(first_query[1].split(" "))
+        for key, value in self.query_params.items():
+            self.url += '&' + str(key)+'='+'+'.join(value.split(" "))
+        return self.url
 
     def get_pages(self):
         """
