@@ -5,6 +5,7 @@ import os
 import logging
 import validators
 from urllib.parse import urlparse
+from datetime import datetime
 # from skraped.scraper_base import ScraperBase
 
 lgr = logging.getLogger()
@@ -56,3 +57,20 @@ def get_job_id(url, source):
         except IndexError:  # pragma: nocover
             pass
     return None
+
+
+def parse_pickle_name(pickle_date=None):
+    """
+    Parses picle name from input date strings or returns the current pickle name if no
+    date is not passed
+    @param pickle_date: The date the pickle was created
+    @type pickle_date: str | None
+    @return: pickle_name
+    @rtype: str | None
+    """
+    if pickle_date:
+        pickle_name = datetime.strptime(pickle_date, "%m-%d-%Y").date().strftime("%m-%d-%Y")
+    else:
+        today = datetime.now().date()
+        pickle_name = today.strftime("%m-%d-%Y")
+    return pickle_name

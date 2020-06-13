@@ -1,6 +1,7 @@
 import pytest
+from datetime import datetime
 from unittest import TestCase
-from skraped.utils import validate_and_parse_url, get_job_id
+from skraped.utils import validate_and_parse_url, get_job_id, parse_pickle_name
 
 
 class TestUtils(TestCase):
@@ -32,3 +33,14 @@ class TestUtils(TestCase):
         get_id_fail = get_job_id("thisisnotaurl", source = "somesauce")
         assert glassdoor_id is None, "Should fail because of invalid source identifier"
         assert get_id_fail is None, "Should fail because an ivalid url was passed"
+    
+    def test_parse_pickle_name_pass(self):
+        target_pickle_name = parse_pickle_name("06-08-2020")
+        assert target_pickle_name == "06-08-2020", "Should validate the format correctly"
+        today_pickle = parse_pickle_name()
+        assert today_pickle == datetime.now().date().strftime("%m-%d-%Y"), \
+        "Should return pickle name matching today's date in  the correct format"
+    
+    def test_parse_pickle_name_fail(self):
+        with pytest.raises(ValueError):
+            parse_pickle_name("06-45-20000")
