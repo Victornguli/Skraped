@@ -23,9 +23,10 @@ else:
     lgr.addHandler(logging.StreamHandler())
 
 
-def main():
+def main():  # pragma: nocover
     lgr.info("Initialized Skraper at {}".format(datetime.now().strftime("%d/%m/%y %H:%M %p")))
-    config = parse_config()
+    config = parse_config(sys.argv[1:])
+    return config
     validate_conf(config)
     base = ScraperBase(config)
     if config["recover"]:
@@ -55,7 +56,7 @@ def get_class_instance(class_name, **kwargs):
     if class_name in globals() and hasattr(globals()[class_name], '__class__'):
         try:
             return globals()[class_name](**kwargs)
-        except TypeError:
+        except TypeError:  # pragma: nocover
             lgr.warning(f'{class_name} cannot be retrieved.')
     return None
 

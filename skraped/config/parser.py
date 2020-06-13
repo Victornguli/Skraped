@@ -11,7 +11,7 @@ DEFAULT_SETTINGS_PATH = os.path.normpath(
     os.path.join(base_path, 'settings.yaml'))
 
 
-def parse_cli_args():
+def parse_cli_args(args):
     """Parses arguments passed through cli"""
     parser = argparse.ArgumentParser(
         description='Welcome to Skraper, a job scrapper and aggregator CLI tool to help you through your job search.',
@@ -34,7 +34,7 @@ def parse_cli_args():
         '--recover', type=str, dest="pickle_path", action="store", required=False,
         help="The target date matching a saved pickle to recover scraped data into data.csv file"
     )
-    return parser.parse_args()
+    return parser.parse_args(args)
 
 
 def parse_yaml_args(settings_path=''):
@@ -52,14 +52,13 @@ def parse_yaml_args(settings_path=''):
     raise FileNotFoundError(f"Settings file {settings_path} does not exist")
 
 
-def parse_config():
+def parse_config(args):
     """Parses all config args, prioritizing cli args over those declared in settings.yml"""
-    cli_config = parse_cli_args()
+    cli_config = parse_cli_args(args)
     yaml_config = parse_yaml_args(settings_path=cli_config.settings)
-    # @TODO: Better config precedence
     config = yaml_config
     for k, v in cli_config.__dict__.items():
-        if v is not None:
+        if v is not None:  # pragma: nocover
             config[k] = v
     config["keywords"] = "".join(config["keywords"])
     return config

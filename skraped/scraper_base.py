@@ -236,7 +236,7 @@ class ScraperBase():
             print(str(e))
         return None
 
-    def process_job_details(self, class_instance, target_method, job_links, **kwargs):
+    def process_job_details(self, class_instance, target_method, job_links, **kwargs):  # pragma: nocover
         """
         Manages a pool of multi-threaded calls to each job_link scraper function
         @param class_instance: The instance of the scraper class calling this method

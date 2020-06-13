@@ -17,18 +17,15 @@ VALID_CONFIG = {
     'recover': (bool, '')
 }
 
-# @TODO: Add recurvise validation for nested configuration items
 
 class ConfigError(Exception):
     def __init__(self, *args):
-        if args:
-            self.message = args[0]
-        else:
-            self.message = None
+        self.args = args
 
-    def __str__(self):
-        if self.message:
-            return f'ConfigError: {self.message} config is invalid'
+    def __str__(self):  # pragma: nocover
+        message = self.args[0] if self.args else None
+        if message:
+            return f'ConfigError: {message} config is invalid'
         else:
             return f'ConfigError: the configuration passed is invalid'
 
@@ -39,7 +36,7 @@ def validate_sources(sources, conf):
         raise ConfigError('sources')
     for source in sources:
         if source not in VALID_CONFIG['sources'][1]:
-            raise ConfigError('sources')
+            raise ConfigError()
 
 
 def validate_output_path(path, config):
@@ -49,8 +46,6 @@ def validate_output_path(path, config):
     output_path = path
     if not os.path.exists(path):
         os.mkdir(path)
-    if not os.path.exists(path):
-        raise ConfigError('path')
     normalized_path = os.path.abspath(output_path)
     config['output_path'] = normalized_path
 
@@ -58,16 +53,16 @@ def validate_output_path(path, config):
 def validate_pickle_date(pickle_date, conf):
     """Validates the pickle date passed, if any, and sets-up the recovery flag in conf"""
     pickle_name = parse_pickle_name(pickle_date)
-    if pickle_date:
+    if pickle_date:  # pragma: nocover
         conf["recover"] = True
     else:
         conf["recover"] = False
-    
+
     pickle_dir = os.path.join(conf["output_path"], "pickles")
     if not os.path.exists(pickle_dir):
         os.mkdir(pickle_dir)
     conf["pickle_path"] = os.path.join(pickle_dir, pickle_name)
-    
+
 
 def validate_conf(conf):
     """Validates a config before running the scraper"""
