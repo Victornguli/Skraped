@@ -14,7 +14,7 @@ VALID_CONFIG = {
     'delay': (bool, False),
     'delay_range': (dict, {'min_delay': (int, 0), 'max_delay': (int, 0)}),
     'pickle_path': (str, ''),
-    'recover': (bool, '')
+    'recover': (bool, False)
 }
 
 

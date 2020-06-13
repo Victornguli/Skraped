@@ -24,9 +24,9 @@ else:
 
 
 def main():  # pragma: nocover
-    lgr.info("Initialized Skraper at {}".format(datetime.now().strftime("%d/%m/%y %H:%M %p")))
+    lgr.info("Initialized Skraper at {}".format(
+        datetime.now().strftime("%d/%m/%y %H:%M %p")))
     config = parse_config(sys.argv[1:])
-    return config
     validate_conf(config)
     base = ScraperBase(config)
     if config["recover"]:
@@ -47,7 +47,8 @@ def main():  # pragma: nocover
     base.save_csv(scrape_data)
 
     t_end = time.perf_counter()
-    lgr.info("Complete!! Skraper ran for {} second(s)".format(round(t_end - t_start, 2)))
+    lgr.info("Complete!! Skraper ran for {} second(s)".format(
+        round(t_end - t_start, 2)))
     return
 
 
