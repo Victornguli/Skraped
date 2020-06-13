@@ -1,5 +1,4 @@
 import pytest
-# from fake_useragent import UserAgent
 from skraped import ScraperBase, BrighterMonday
 
 
@@ -27,13 +26,21 @@ def test_load_pickle(valid_config, scrape_data):
     assert pickle_save is True
     assert ScraperBase(valid_config).load_pickle() != []
 
+def test_recover_scraped_data(valid_config, scrape_data):
+    base = ScraperBase(valid_config)
+    pickle_save = base.save_pickle(scrape_data)
+    assert pickle_save is True, "Should save the pickle successfully"
+    base.recover_scraped_data()
+    data = base.load_csv()
+    assert data[0].get('job_id') == scrape_data[0].get('job_id'), \
+        "The recovered data must be equal to the one in scrape_data"
 
 def test_run_pre_scrape_filters(job_links, saved_csv, valid_config):
     assert saved_csv() is True
     pre_filter = ScraperBase(valid_config).run_pre_scrape_filters(
         job_links, "glassdoor")
-    assert len(
-        pre_filter) == 2, "Should filter out existing job_ids from the returned job_links"
+    assert len(pre_filter) == 2, \
+        "Should filter out existing job_ids from the returned job_links"
 
 
 def test_merge_scrape_data(scraper_base_instance, saved_csv, scrape_data):

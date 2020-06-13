@@ -36,9 +36,10 @@ class TestUtils(TestCase):
     
     def test_parse_pickle_name_pass(self):
         target_pickle_name = parse_pickle_name("06-08-2020")
-        assert target_pickle_name == "06-08-2020", "Should validate the format correctly"
+        assert target_pickle_name == "06-08-2020.pkl", "Should validate the format correctly"
         today_pickle = parse_pickle_name()
-        assert today_pickle == datetime.now().date().strftime("%m-%d-%Y"), \
+        today = datetime.now().date().strftime('%m-%d-%Y')
+        assert today_pickle == f"{today}.pkl", \
         "Should return pickle name matching today's date in  the correct format"
     
     def test_parse_pickle_name_fail(self):

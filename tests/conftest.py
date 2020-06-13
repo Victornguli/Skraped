@@ -1,5 +1,7 @@
 import pytest
+import os
 from skraped import ScraperBase, BrighterMonday, Glassdoor
+from skraped.utils import parse_pickle_name
 
 
 @pytest.fixture
@@ -9,10 +11,18 @@ def scraper_base_instance(valid_config):
 
 @pytest.fixture
 def valid_config(tmpdir):
+    pickle_path = os.path.join(tmpdir, parse_pickle_name())
     return {
         'output_path': tmpdir, 'sources': ['Glassdoor', 'BrighterMonday'],
-        'keywords': 'Software Developer', 'delay': True,
-        'delay_range': {'min_delay': 2, 'max_delay': 10}}
+        'keywords': 'Software Developer', 'delay': True, 'recover': False,
+        'delay_range': {'min_delay': 2, 'max_delay': 10}, 'pickle_path': pickle_path}
+
+
+@pytest.fixture
+def save_pickle(valid_config):
+    base_instance = ScraperBase(valid_config)
+    pickle_save = base_instance.save_pickle(scrape_data)
+    assert pickle_save is True
 
 
 @pytest.fixture
