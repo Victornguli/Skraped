@@ -28,6 +28,9 @@ def main():
     config = parse_config()
     validate_conf(config)
     base = ScraperBase(config)
+    if config["recover"]:
+        base.recover_scraped_data()
+        return
     scraper_classes = config.get('sources')
     scrape_data = []
     for scraper in scraper_classes:

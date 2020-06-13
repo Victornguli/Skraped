@@ -7,7 +7,8 @@ from yaml import load, dump
 lgr = logging.getLogger()
 
 base_path = os.path.dirname(os.path.abspath(__file__))
-DEFAULT_SETTINGS_PATH = os.path.normpath(os.path.join(base_path, 'settings.yaml'))
+DEFAULT_SETTINGS_PATH = os.path.normpath(
+    os.path.join(base_path, 'settings.yaml'))
 
 
 def parse_cli_args():
@@ -27,6 +28,11 @@ def parse_cli_args():
     parser.add_argument(
         '-s', '-settings', type=str, dest='settings', action='store', required=False,
         help='The full path to settings.yaml file for custom configuration'
+    )
+
+    parser.add_argument(
+        '--recover', type=str, dest="pickle_path", action="store", required=False,
+        help="The target date matching a saved pickle to recover scraped data into data.csv file"
     )
     return parser.parse_args()
 

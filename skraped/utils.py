@@ -73,4 +73,4 @@ def parse_pickle_name(pickle_date=None):
     else:
         today = datetime.now().date()
         pickle_name = today.strftime("%m-%d-%Y")
-    return pickle_name
+    return f"{pickle_name}.pkl"

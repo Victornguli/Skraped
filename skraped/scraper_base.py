@@ -22,8 +22,10 @@ class ScraperBase():
         self.config = config
         self.output_path = self.config.get('output_path')
         self.delay = self.config.get('delay', False)
-        self.min_delay  = self.config.get('delay_range', {}).get('min_delay', 0)
-        self.max_delay  = self.config.get('delay_range', {}).get('max_delay', 10)
+        self.min_delay = self.config.get('delay_range', {}).get('min_delay', 0)
+        self.max_delay = self.config.get(
+            'delay_range', {}).get('max_delay', 10)
+        self.pickle_path = self.config.get("pickle_path")
 
     def scrape(self):  # pragma: nocover
         """
@@ -42,8 +44,9 @@ class ScraperBase():
             if scrape_data:
                 with open(os.path.join(self.output_path, "data.csv"), "w", newline="") as f:
                     fieldnames = ["TITLE", "COMPANY", "JOB LINK",
-                                "APPLICATION LINK", "JOB ID", "SOURCE"]
-                    writer = csv.DictWriter(f, fieldnames=fieldnames, quoting = csv.QUOTE_MINIMAL)
+                                  "APPLICATION LINK", "JOB ID", "SOURCE"]
+                    writer = csv.DictWriter(
+                        f, fieldnames=fieldnames, quoting=csv.QUOTE_MINIMAL)
                     writer.writeheader()
                     for row in scrape_data:
                         data = {
@@ -97,16 +100,16 @@ class ScraperBase():
         """
         try:
             if scrape_data:
-                with open(os.path.join(self.output_path, "data.pkl"), "wb") as pickle_file:
+                with open(self.pickle_path, "wb") as pickle_file:
                     pickle.dump(scrape_data, pickle_file)
                 lgr.info(
-                    f"Dumped scraped pickle at {self.output_path} successfully")
+                    f"Dumped scraped pickle at {self.pickle_path} successfully")
                 return True
         except Exception as ex:  # pragma: nocover
             lgr.error(
-                f"Failed to save pickle data at {self.output_path}")
+                f"Failed to save pickle data at {self.pickle_path}")
             print(str(ex))
-        return False
+        return False  # pragma: nocover
 
     def load_pickle(self):
         """
@@ -116,16 +119,28 @@ class ScraperBase():
         """
         scrape_data = []
         try:
-            with open(os.path.join(self.output_path, "data.pkl"), "rb") as pickle_file:
+            with open(self.pickle_path, "rb") as pickle_file:
                 scrape_data = pickle.load(pickle_file)
             lgr.info(
-                f"Loaded scrape_data from pickle at {self.output_path} successfully")
+                f"Loaded scrape_data from pickle at {self.pickle_path} successfully")
             return scrape_data
         except Exception as ex:  # pragma: nocover
             lgr.error(
-                f"Failed to load scrape_data from pickle data at {self.output_path}")
+                f"Failed to load scrape_data from pickle data at {self.pickle_path}")
             print(str(ex))
-        return scrape_data
+        return scrape_data  # pragma: nocover
+
+    def recover_scraped_data(self):
+        """
+        Recovers scraped data from a saved pickle
+        """
+        scraped_data = self.load_pickle()
+        csv_recover = self.save_csv(scraped_data)
+        if csv_recover:
+            lgr.info(
+                f"Recovered data save to {self.output_path} successfully.")
+        else:  # pragma: nocover
+            lgr.info(f"Failed to save recovered data to {self.output_path}.")
 
     def merge_scrape_data(self, scrape_data):
         """
@@ -138,7 +153,8 @@ class ScraperBase():
         try:
             if scrape_data:
                 csv_data = self.load_csv()
-                dups = dict((i["job_id"], i) for i in csv_data if i) if csv_data else {}
+                dups = dict((i["job_id"], i)
+                            for i in csv_data if i) if csv_data else {}
                 for job in scrape_data:
                     dups[job["job_id"]] = job
                 scrape_data = [dups[key] for key in dups]
@@ -159,8 +175,10 @@ class ScraperBase():
         @rtype list 
         """
         filtered_links = []
-        scraped_ids = dict((get_job_id(job_link, source), job_link) for job_link in job_links)
-        lgr.info('Parsed {} job ids from {} links'.format(len(scraped_ids), len(job_links)))
+        scraped_ids = dict((get_job_id(job_link, source), job_link)
+                           for job_link in job_links)
+        lgr.info('Parsed {} job ids from {} links'.format(
+            len(scraped_ids), len(job_links)))
         try:
             # Get saved ids first(load from csv file, default to empty list if csv data DNE)
             saved_ids = []
@@ -168,13 +186,15 @@ class ScraperBase():
                 if job["source"] and job["source"].lower() == source.lower():
                     saved_ids.append(job["job_id"])
             # Filter scraped links against the saved_ids to avoid scraping existing jobs
-            filtered_links = [scraped_ids[job_id] for job_id in scraped_ids if job_id not in saved_ids and job_id is not None]
-            lgr.info('Scraping {} new links from {} scraped links'.format(len(filtered_links), len(job_links)))
+            filtered_links = [scraped_ids[job_id]
+                              for job_id in scraped_ids if job_id not in saved_ids and job_id is not None]
+            lgr.info('Scraping {} new links from {} scraped links'.format(
+                len(filtered_links), len(job_links)))
             return filtered_links
         except Exception as e:   # pragma: nocover
             lgr.info("Failed to filter job_ids")
             print(str(e))
-        return filtered_links
+        return filtered_links  # pragma: nocover
 
     @staticmethod
     def send_request(url, method, return_raw=False):
@@ -232,14 +252,16 @@ class ScraperBase():
                 try:
                     method_instance = getattr(class_instance, target_method)
                 except AttributeError as e:  # pragma: nocover
-                    lgr.error(f"Method {target_method} does not exist in {class_instance} scraper class")
+                    lgr.error(
+                        f"Method {target_method} does not exist in {class_instance} scraper class")
                     print(e)
                 else:
                     results = []
                     futures = [executor.submit(
-                        method_instance, link, delay = random.randrange(self.min_delay, self.max_delay) if self.delay else 0, **kwargs) for link in job_links]
+                        method_instance, link, delay=random.randrange(self.min_delay, self.max_delay) if self.delay else 0, **kwargs) for link in job_links]
                     for future in as_completed(futures):
                         res = future.result()
                         results.append(res)
-                    getattr(class_instance, 'scrape_data').extend(results) # Extend scrape_data instance for that scraper class
+                    # Extend scrape_data instance for that scraper class
+                    getattr(class_instance, 'scrape_data').extend(results)
         return
