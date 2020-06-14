@@ -6,6 +6,7 @@ import time
 import random
 from bs4 import BeautifulSoup
 from .scraper_base import ScraperBase
+from skraped.utils import get_job_id
 
 lgr = logging.getLogger()
 
@@ -163,6 +164,9 @@ class Glassdoor(ScraperBase):
             application_link = link_redirect.url
         job_details['application_link'] = (application_link).encode(
             'ascii', 'ignore').decode('utf-8')
-        job_details['job_id'] = apply_btn['data-job-id'] if apply_btn else ''
-
+        job_id = apply_btn['data-job-id'] if apply_btn else ''
+        # Try to retrieve job_id from the url if not found from apply_btn
+        if not job_id:
+            job_id = get_job_id(job_url, self.name)
+        job_details['job_id'] = job_id
         return job_details

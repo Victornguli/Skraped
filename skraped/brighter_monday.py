@@ -2,7 +2,7 @@ import logging
 import time
 from bs4 import BeautifulSoup
 from .scraper_base import ScraperBase
-from skraped.utils import validate_and_parse_url
+from skraped.utils import validate_and_parse_url, get_job_id
 
 lgr = logging.getLogger()
 
@@ -154,11 +154,10 @@ class BrighterMonday(ScraperBase):
         title = soup.find('h1', {'class': 'job-header__title'})
         company = soup.find(
             'div', {'class': ['if-wrapper-column', 'job-header__details']}).find('h2').find('a')
-        url_path = validate_and_parse_url(job_url)['path']
-        job_id = url_path.split("-")[-1] if url_path else None
+        job_id = get_job_id(job_url, self.name)
 
         job_details['title'] = title.text.strip() if title else ''
         job_details['company'] = company.text.strip() if company else ''
-        job_details['job_id'] = job_id
+        job_details['job_id'] = job_id if job_id else ''
 
         return job_details
