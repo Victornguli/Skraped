@@ -102,7 +102,6 @@ class Glassdoor(ScraperBase):
                         if not link.startswith(self.base_url):
                             link = self.base_url+link
                         job_links.add(link)
-        print(job_links)
         return list(job_links)
 
     def extract_job_details(self, job_url, delay = 0, **kwargs):
