@@ -21,12 +21,13 @@ pip install git+https://github.com/Victornguli/Skraped.git
 skraper --help
 ```
 
-or you can first clone the repository then install setup using pip
+or for testing purposes you can first clone the repository then install skraped via setup.py
 
 ```
 git clone https://github.com/Victornguli/Skraped.git skraped
 cd skraped
-python install setup.py
+python setup.py install
+skraper --help
 ```
 
 ### Using Skraped
