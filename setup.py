@@ -1,6 +1,8 @@
 from setuptools import setup, find_packages
 
-from skraped import __version__ as version
+# import from skraped package triggers imports of other modules unavailable during setup install
+# from skraped import __version__ as version
+version = '0.0.1'
 
 description = 'CLI tool for scraping and aggregating Kenyan tech job posted on various job boards'
 url = 'https://github.com/Victornguli/Skraped'
