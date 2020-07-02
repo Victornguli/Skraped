@@ -1,9 +1,5 @@
-import os
 import logging
-import json
-import csv
 import time
-import random
 from bs4 import BeautifulSoup
 from .scraper_base import ScraperBase
 from skraped.utils import get_job_id
@@ -103,7 +99,10 @@ class Glassdoor(ScraperBase):
                 links = [link['href'] for link in links if hasattr(link, 'href')]
                 for link in links:
                     if link not in job_links:
-                        job_links.add(self.base_url + link)
+                        if not link.startswith(self.base_url):
+                            link = self.base_url+link
+                        job_links.add(link)
+        print(job_links)
         return list(job_links)
 
     def extract_job_details(self, job_url, delay = 0, **kwargs):
@@ -153,16 +152,22 @@ class Glassdoor(ScraperBase):
         job_details['company'] = company_name.encode(
             'ascii', 'ignore').decode('utf-8') if company_name else ''
         if hasattr(apply_btn, 'href') and apply_btn.name != 'button':
-            application_link = self.base_url + apply_btn['href']
+            if apply_btn['href'].startswith(self.base_url):
+                application_link = apply_btn['href']
+            else:
+                application_link = self.base_url + apply_btn['href']
         elif hasattr(apply_btn, 'data-job-url'):  # pragma: nocover
-            application_link = self.base_url + apply_btn['data-job-url']
+            if apply_btn['data-job-url'].startswith(self.base_url):
+                application_link = apply_btn['data-job-url']
+            else:
+                application_link = self.base_url + apply_btn['data-job-url']
         else:  # pragma: nocover
             application_link = ''
         link_redirect = self.send_request(
             application_link, 'get', return_raw=True)
         if link_redirect is not None:
             application_link = link_redirect.url
-        job_details['application_link'] = (application_link).encode(
+        job_details['application_link'] = application_link.encode(
             'ascii', 'ignore').decode('utf-8')
         job_id = apply_btn['data-job-id'] if apply_btn else ''
         # Try to retrieve job_id from the url if not found from apply_btn
