@@ -1,7 +1,7 @@
+# Skraped!
+
 [![Coverage Status](https://coveralls.io/repos/github/Victornguli/Skraped/badge.svg)](https://coveralls.io/github/Victornguli/Skraped)
 [![Build Status](https://travis-ci.com/Victornguli/Skraped.svg?branch=master)](https://travis-ci.com/Victornguli/Skraped)
-
-# Skraped!
 
 Scraped is a command line tool that scrapes and aggregates job from several Kenyan job sites. These scraped job posts
  are saved in a csv file that allows a job seeker to conveniently review jobs from several sources.
