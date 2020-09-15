@@ -62,7 +62,7 @@ class ScraperBase():
             lgr.error(
                 '\nFailed to save search results in csv file. Output path'
                 '{}. {}'.format(self.output_path, str(ex)))
-            print(ex)
+            print(str(e))
         return False  # pragma: nocover
 
     def load_csv(self):
@@ -162,7 +162,7 @@ class ScraperBase():
                 return scrape_data
         except Exception as ex:  # pragma: nocover
             lgr.error("Failed to merge scraped data. {}".format(str(ex)))
-            print(ex)
+            print(str(ex))
         return scrape_data  # pragma: nocover
 
     def run_pre_scrape_filters(self, job_links, source):
