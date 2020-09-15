@@ -134,6 +134,8 @@ class Glassdoor(ScraperBase):
             'source': self.name
         }
         title = soup.find('div', {'class': 'e11nt52q5'})
+        if title is None:
+            title = soup.find('div', {'class': 'e11nt52q6'})
         company_container = [child for child in soup.find(
             'div', {'class': 'e11nt52q1'})]
         company_name = soup.find('div', {'class': 'e11nt52q1'}).text

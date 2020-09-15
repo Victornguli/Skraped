@@ -60,8 +60,9 @@ class ScraperBase():
                 return True
         except Exception as e:  # pragma: nocover
             lgr.error(
-                f'\nFailed to save search results in csv file. Output path {self.output_path}')
-            print(str(e))
+                '\nFailed to save search results in csv file. Output path'
+                '{}. {}'.format(self.output_path, str(ex)))
+            print(ex)
         return False  # pragma: nocover
 
     def load_csv(self):
@@ -160,8 +161,8 @@ class ScraperBase():
                 scrape_data = [dups[key] for key in dups]
                 return scrape_data
         except Exception as ex:  # pragma: nocover
-            lgr.error("Failed to merge scraped data")
-            print(str(ex))
+            lgr.error("Failed to merge scraped data. {}".format(str(ex)))
+            print(ex)
         return scrape_data  # pragma: nocover
 
     def run_pre_scrape_filters(self, job_links, source):
@@ -261,7 +262,8 @@ class ScraperBase():
                         method_instance, link, delay=random.randrange(self.min_delay, self.max_delay) if self.delay else 0, **kwargs) for link in job_links]
                     for future in as_completed(futures):
                         res = future.result()
-                        results.append(res)
+                        if res is not None:
+                            results.append(res)
                     # Extend scrape_data instance for that scraper class
                     getattr(class_instance, 'scrape_data').extend(results)
         return
