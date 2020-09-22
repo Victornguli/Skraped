@@ -153,9 +153,7 @@ class BrighterMonday(ScraperBase):
         }
         title = soup.find('h1', {'class': 'job-header__title'})
         company = soup.find(
-            'div', {'class': ['if-wrapper-column', 'job-header__details']}).find('h2')
-        if company.find('a'):
-            company = company.find('a')
+            'div', {'class': ['if-wrapper-column', 'job-header__details']}).find('h2').find('a')
         job_id = get_job_id(job_url, self.name)
 
         job_details['title'] = title.text.strip() if title else ''
