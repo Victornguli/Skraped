@@ -4,8 +4,9 @@ output_path: "data"
 
 # Sources to be scraped: Comment out either to ignore it when running skraper.
 # Defaults to Linkedin, Glassdoor and BrighterMonday.
+# Linkedin scraper is WIP
 sources:
-  # - "Linkedin"
+# - "Linkedin"
   - "Glassdoor"
   - "BrighterMonday"
 

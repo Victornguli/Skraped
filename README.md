@@ -6,6 +6,8 @@
 Scraped is a command line tool that scrapes and aggregates job from several Kenyan job sites. These scraped job posts
  are saved in a csv file that allows a job seeker to conveniently review jobs from several sources.
  
+![alt text](https://github.com/victornguli/Skraped/raw/master/media/sample_scrape.gif "Sample scraper run") 
+ 
 ## Getting Started
 
 These instructions will get you a copy of Skraper running on your local machine for development and testing purposes.

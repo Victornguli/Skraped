@@ -205,7 +205,6 @@ class ScraperBase():
             headers = {
                 'User-Agent': ua.random,
                 'Accept-Language': 'en-GB',
-                'Accept-Encoding': 'gzip, deflate, br',
                 'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
                 'Referer': 'https://www.google.co.ke',
             }

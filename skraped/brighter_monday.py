@@ -10,10 +10,11 @@ lgr = logging.getLogger()
 class BrighterMonday(ScraperBase):
     """Scraper class for scraping Brighter Monday jobs"""
 
-    def __init__(self, config={}):
+    def __init__(self, config=None):
+        if config is None:
+            config = {}
         super().__init__(config)
         self.base_url = 'https://www.brightermonday.co.ke'
-        # self.url = 'https://www.brightermonday.co.ke/jobs'
         # Provides more accurate results for IT Jobs
         self.url = 'https://www.brightermonday.co.ke/jobs/software-data'
         self.query_params = {
