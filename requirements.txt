@@ -23,7 +23,6 @@ pytest-cov==2.8.1
 PyYAML==5.4.1
 requests==2.25.1
 six==1.15.0
-Skraped==0.0.1
 soupsieve==2.2.1
 toml==0.10.2
 urllib3==1.25.11
