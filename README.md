@@ -62,4 +62,8 @@ Under yaml settings file you can configure the following options
 
 
 
+### Local development
+If you use the setup.py instal method, you will need to run **python setup.py install** to update the skraper egg binary so that the 
+command **skraper** can run the latest version within your virtualenvironment
+
 **Goodluck in your job search :)**
